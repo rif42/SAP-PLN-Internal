@@ -18,7 +18,7 @@ class ManageSuppliers extends ManageRecords
     {
         return [
             ExportAction::make()->exporter(SupplierExporter::class),
-            ImportAction::make()->importer(SupplierImporter::class),
+            ImportAction::make()->importer(SupplierImporter::class)->csvDelimiter(';'),
             Actions\CreateAction::make(),
         ];
     }

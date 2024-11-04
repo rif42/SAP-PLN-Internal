@@ -16,8 +16,18 @@ class SupplierExporter extends Exporter
         return [
             ExportColumn::make('name')
                 ->label(__('resources.supplier.name')),
-            ExportColumn::make('contact_info')
-                ->label(__('resources.supplier.contact_info')),
+            ExportColumn::make('sales_name')
+                ->label(__('resources.supplier.sales_name')),
+            ExportColumn::make('sales_phone')
+                ->label(__('resources.supplier.sales_phone')),
+            ExportColumn::make('sales_email')
+                ->label(__('resources.supplier.sales_email')),
+            ExportColumn::make('logistics_name')
+                ->label(__('resources.supplier.logistics_name')),
+            ExportColumn::make('logistics_phone')
+                ->label(__('resources.supplier.logistics_phone')),
+            ExportColumn::make('logistics_email')
+                ->label(__('resources.supplier.logistics_email')),
             ExportColumn::make('created_at')
                 ->label(__('resources.supplier.created_at')),
             ExportColumn::make('updated_at')

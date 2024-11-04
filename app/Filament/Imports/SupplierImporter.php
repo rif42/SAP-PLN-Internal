@@ -18,10 +18,28 @@ class SupplierImporter extends Importer
                 ->label(__('resources.supplier.name'))
                 ->requiredMapping()
                 ->rules(['required']),
-            ImportColumn::make('contact_info')
-                ->label(__('resources.supplier.contact_info'))
+            ImportColumn::make('sales_name')
+                ->label(__('resources.supplier.sales_name'))
                 ->requiredMapping()
                 ->rules(['required']),
+            ImportColumn::make('sales_phone')
+                ->label(__('resources.supplier.sales_phone'))
+                ->requiredMapping()
+                ->rules(['required']),
+            ImportColumn::make('sales_email')
+                ->label(__('resources.supplier.sales_email'))
+                ->rules(['email', 'nullable']),
+            ImportColumn::make('logistics_name')
+                ->label(__('resources.supplier.logistics_name'))
+                ->requiredMapping()
+                ->rules(['required']),
+            ImportColumn::make('logistics_phone')
+                ->label(__('resources.supplier.logistics_phone'))
+                ->requiredMapping()
+                ->rules(['required']),
+            ImportColumn::make('logistics_email')
+                ->label(__('resources.supplier.logistics_email'))
+                ->rules(['email', 'nullable']),
         ];
     }
 

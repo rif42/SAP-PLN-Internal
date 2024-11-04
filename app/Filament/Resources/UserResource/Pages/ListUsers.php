@@ -18,7 +18,7 @@ class ListUsers extends ListRecords
     {
         return [
             ExportAction::make()->exporter(UserExporter::class),
-            ImportAction::make()->importer(UserImporter::class),
+            ImportAction::make()->importer(UserImporter::class)->csvDelimiter(';'),
             Actions\CreateAction::make(),
         ];
     }

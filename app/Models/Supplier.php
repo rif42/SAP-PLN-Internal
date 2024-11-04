@@ -13,13 +13,18 @@ class Supplier extends Model
 
     protected $fillable = [
         'name',
-        'contact_info',
+        'sales_name',
+        'sales_phone',
+        'sales_email',
+        'logistics_name',
+        'logistics_phone',
+        'logistics_email',
     ];
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'contact_info'])
+            ->logOnly(['name', 'sales_name', 'sales_phone', 'sales_email', 'logistics_name', 'logistics_phone', 'logistics_email'])
             ->logOnlyDirty();
     }
 

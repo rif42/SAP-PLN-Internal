@@ -68,7 +68,12 @@ return [
     'supplier' => [
         'label' => 'Pemasok',
         'name' => 'Nama',
-        'contact_info' => 'Informasi Kontak',
+        'sales_name' => 'Nama Kontak Penjualan',
+        'sales_phone' => 'Telepon Penjualan',
+        'sales_email' => 'Email Penjualan',
+        'logistics_name' => 'Nama Kontak Logistik',
+        'logistics_phone' => 'Telepon Logistik',
+        'logistics_email' => 'Email Logistik',
         'created_at' => 'Dibuat Pada',
         'updated_at' => 'Diperbarui Pada',
         'notifications' => [

@@ -18,7 +18,7 @@ class ManageCategories extends ManageRecords
     {
         return [
             ExportAction::make()->exporter(CategoryExporter::class),
-            ImportAction::make()->importer(CategoryImporter::class),
+            ImportAction::make()->importer(CategoryImporter::class)->csvDelimiter(';'),
             Actions\CreateAction::make(),
         ];
     }

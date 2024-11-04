@@ -53,7 +53,12 @@ return [
     'supplier' => [
         'label' => 'Suppliers',
         'name' => 'Name',
-        'contact_info' => 'Contact Info',
+        'sales_name' => 'Sales Contact Name',
+        'sales_phone' => 'Sales Phone',
+        'sales_email' => 'Sales Email',
+        'logistics_name' => 'Logistics Contact Name',
+        'logistics_phone' => 'Logistics Phone',
+        'logistics_email' => 'Logistics Email',
         'created_at' => 'Created At',
         'notifications' => [
             'import' => [

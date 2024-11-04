@@ -28,10 +28,32 @@ class SupplierResource extends Resource
                     ->label(__('resources.supplier.name'))
                     ->required()
                     ->columnSpanFull(),
-                Forms\Components\Textarea::make('contact_info')
-                    ->label(__('resources.supplier.contact_info'))
-                    ->required()
-                    ->columnSpanFull(),
+                Forms\Components\Section::make(__('Sales Contact'))
+                    ->schema([
+                        Forms\Components\TextInput::make('sales_name')
+                            ->label(__('resources.supplier.sales_name'))
+                            ->required(),
+                        Forms\Components\TextInput::make('sales_phone')
+                            ->label(__('resources.supplier.sales_phone'))
+                            ->required()
+                            ->tel(),
+                        Forms\Components\TextInput::make('sales_email')
+                            ->label(__('resources.supplier.sales_email'))
+                            ->email(),
+                    ])->columns(3),
+                Forms\Components\Section::make(__('Logistics Contact'))
+                    ->schema([
+                        Forms\Components\TextInput::make('logistics_name')
+                            ->label(__('resources.supplier.logistics_name'))
+                            ->required(),
+                        Forms\Components\TextInput::make('logistics_phone')
+                            ->label(__('resources.supplier.logistics_phone'))
+                            ->required()
+                            ->tel(),
+                        Forms\Components\TextInput::make('logistics_email')
+                            ->label(__('resources.supplier.logistics_email'))
+                            ->email(),
+                    ])->columns(3),
             ]);
     }
 
@@ -42,9 +64,21 @@ class SupplierResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('resources.supplier.name'))
                     ->searchable(),
-                Tables\Columns\TextColumn::make('contact_info')
-                    ->label(__('resources.supplier.contact_info'))
-                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('sales_name')
+                    ->label(__('resources.supplier.sales_name'))
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('sales_phone')
+                    ->label(__('resources.supplier.sales_phone'))
+                    ->searchable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('logistics_name')
+                    ->label(__('resources.supplier.logistics_name'))
+                    ->searchable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('logistics_phone')
+                    ->label(__('resources.supplier.logistics_phone'))
+                    ->searchable()
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label(__('resources.supplier.created_at'))
                     ->dateTime()
