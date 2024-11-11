@@ -9,27 +9,27 @@ use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Contract extends Model
+class Procurement extends Model
 {
     use LogsActivity, SoftDeletes;
 
     protected $fillable = [
+        'code',
+        'number',
         'supplier_id',
         'start_date',
         'end_date',
-        'total_amount',
-        'status',
     ];
 
     protected $casts = [
-        'start_date' => 'datetime',
-        'end_date' => 'datetime',
+        'start_date' => 'date',
+        'end_date' => 'date',
     ];
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['supplier.name', 'start_date', 'end_date', 'total_amount', 'status'])
+            ->logOnly(['code', 'number', 'supplier.name', 'start_date', 'end_date'])
             ->logOnlyDirty();
     }
 
@@ -38,8 +38,13 @@ class Contract extends Model
         return $this->belongsTo(Supplier::class);
     }
 
-    public function items(): HasMany
+    public function products(): HasMany
     {
-        return $this->hasMany(ContractItem::class);
+        return $this->hasMany(ProcurementProduct::class);
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
     }
 }

@@ -2,33 +2,31 @@
 
 namespace App\Models;
 
+use App\Enums\ProductStockType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class ContractItem extends Model
+class ProductStock extends Model
 {
     use LogsActivity, SoftDeletes;
 
     protected $fillable = [
-        'contract_id',
         'product_id',
         'quantity',
-        'unit_price',
+        'type',
+    ];
+
+    protected $casts = [
+        'type' => ProductStockType::class,
     ];
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['contract.supplier.name', 'product.name', 'quantity', 'unit_price'])
-            ->logOnlyDirty();
-    }
-
-    public function contract(): BelongsTo
-    {
-        return $this->belongsTo(Contract::class);
+            ->logOnly(['product.name', 'quantity', 'type']);
     }
 
     public function product(): BelongsTo

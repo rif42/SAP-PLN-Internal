@@ -8,27 +8,26 @@ use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class ContractItem extends Model
+class InvoiceProduct extends Model
 {
     use LogsActivity, SoftDeletes;
 
     protected $fillable = [
-        'contract_id',
+        'invoice_id',
         'product_id',
+        'price',
         'quantity',
-        'unit_price',
     ];
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['contract.supplier.name', 'product.name', 'quantity', 'unit_price'])
-            ->logOnlyDirty();
+            ->logOnly(['invoice.code', 'product.name', 'price', 'quantity']);
     }
 
-    public function contract(): BelongsTo
+    public function invoice(): BelongsTo
     {
-        return $this->belongsTo(Contract::class);
+        return $this->belongsTo(Invoice::class);
     }
 
     public function product(): BelongsTo

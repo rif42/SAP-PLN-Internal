@@ -14,8 +14,6 @@ class StatsOverview extends BaseWidget
     {
         return [
             Stat::make('Total Products', Product::count()),
-            Stat::make('Total Revenue', 'Rp ' . number_format(Purchase::sum('price'), 0, ',', '.')),
-            Stat::make('Transaction In/Out', Transaction::where('transaction_type', 'in')->count() . ' / ' . Transaction::where('transaction_type', 'out')->count()),
         ];
     }
 }

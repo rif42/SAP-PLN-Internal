@@ -27,6 +27,12 @@ class ProductResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\TextInput::make('code')
+                    ->label(__('resources.product.code'))
+                    ->required()
+                    ->unique()
+                    ->default(fn () => 'PRD-' . str_pad((Product::count() + 1), 5, '0', STR_PAD_LEFT))
+                    ->readOnly(),
                 Forms\Components\TextInput::make('name')
                     ->label(__('resources.product.name'))
                     ->required(),
@@ -64,6 +70,9 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('code')
+                    ->label(__('resources.product.code'))
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('resources.product.name'))
                     ->searchable(),
@@ -89,14 +98,19 @@ class ProductResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ForceDeleteAction::make(),
+                Tables\Actions\RestoreAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
                 ]),
             ]);
     }
@@ -130,5 +144,13 @@ class ProductResource extends Resource
     public static function getBreadcrumb(): string
     {
         return __('resources.product.label');
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
     }
 }

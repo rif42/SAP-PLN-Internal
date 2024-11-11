@@ -30,6 +30,7 @@ return [
     ],
     'product' => [
         'label' => 'Produk',
+        'code' => 'Kode',
         'name' => 'Nama',
         'category' => 'Kategori',
         'barcode' => 'Barcode',

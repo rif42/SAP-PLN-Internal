@@ -6,27 +6,34 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Transaction extends Model
+class ProcurementProduct extends Model
 {
-    use LogsActivity;
+    use LogsActivity, SoftDeletes;
 
     protected $fillable = [
+        'procurement_id',
         'product_id',
-        'transaction_type',
+        'price',
         'quantity',
-        'transaction_date',
     ];
 
     protected $casts = [
-        'transaction_date' => 'datetime',
+        'price' => 'decimal:2',
+        'quantity' => 'integer',
     ];
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['product.name', 'transaction_type', 'quantity', 'transaction_date'])
+            ->logOnly(['procurement.code', 'product.name', 'price', 'quantity'])
             ->logOnlyDirty();
+    }
+
+    public function procurement(): BelongsTo
+    {
+        return $this->belongsTo(Procurement::class);
     }
 
     public function product(): BelongsTo

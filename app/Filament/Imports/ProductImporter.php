@@ -41,7 +41,9 @@ class ProductImporter extends Importer
 
     public function resolveRecord(): ?Product
     {
-        return new Product();
+        $product = new Product();
+        $product->code = 'PRD-' . str_pad((Product::count() + 1), 5, '0', STR_PAD_LEFT);
+        return $product;
     }
 
     public static function getCompletedNotificationBody(Import $import): string
@@ -54,4 +56,4 @@ class ProductImporter extends Importer
 
         return $body;
     }
-} 
+}

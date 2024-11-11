@@ -4,33 +4,31 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Contract extends Model
+class ShippingDocument extends Model
 {
     use LogsActivity, SoftDeletes;
-
+    
     protected $fillable = [
+        'code',
+        'number',
+        'invoice_id',
         'supplier_id',
-        'start_date',
-        'end_date',
-        'total_amount',
-        'status',
-    ];
-
-    protected $casts = [
-        'start_date' => 'datetime',
-        'end_date' => 'datetime',
+        'procurement_id',
     ];
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['supplier.name', 'start_date', 'end_date', 'total_amount', 'status'])
-            ->logOnlyDirty();
+            ->logOnly(['code', 'number', 'invoice.code', 'supplier.name', 'procurement.code']);
+    }
+
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class);
     }
 
     public function supplier(): BelongsTo
@@ -38,8 +36,8 @@ class Contract extends Model
         return $this->belongsTo(Supplier::class);
     }
 
-    public function items(): HasMany
+    public function procurement(): BelongsTo
     {
-        return $this->hasMany(ContractItem::class);
+        return $this->belongsTo(Procurement::class);
     }
 }
