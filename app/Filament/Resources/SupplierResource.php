@@ -28,7 +28,7 @@ class SupplierResource extends Resource
                     ->label(__('resources.supplier.name'))
                     ->required()
                     ->columnSpanFull(),
-                Forms\Components\Section::make(__('Sales Contact'))
+                Forms\Components\Section::make(__('resources.supplier.sales_contact'))
                     ->schema([
                         Forms\Components\TextInput::make('sales_name')
                             ->label(__('resources.supplier.sales_name'))
@@ -41,7 +41,7 @@ class SupplierResource extends Resource
                             ->label(__('resources.supplier.sales_email'))
                             ->email(),
                     ])->columns(3),
-                Forms\Components\Section::make(__('Logistics Contact'))
+                Forms\Components\Section::make(__('resources.supplier.logistics_contact'))
                     ->schema([
                         Forms\Components\TextInput::make('logistics_name')
                             ->label(__('resources.supplier.logistics_name'))

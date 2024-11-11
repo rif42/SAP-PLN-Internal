@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PurchaseResource\Pages;
 use App\Filament\Resources\PurchaseResource\RelationManagers;
+use App\Models\Product;
 use App\Models\Purchase;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -19,7 +20,7 @@ class PurchaseResource extends Resource
     protected static ?string $model = Purchase::class;
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
     protected static ?string $navigationGroup = 'Purchasing';
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 20;
 
     public static function form(Form $form): Form
     {
@@ -45,6 +46,15 @@ class PurchaseResource extends Resource
                     ->relationship('product', 'name')
                     ->required()
                     ->searchable()
+                    ->live()
+                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                        if ($state) {
+                            $product = Product::find($state);
+                            if ($product) {
+                                $set('price', number_format($product->price, 0, ',', '.'));
+                            }
+                        }
+                    })
                     ->createOptionForm([
                         Forms\Components\TextInput::make('name')
                             ->label(__('resources.product.name'))

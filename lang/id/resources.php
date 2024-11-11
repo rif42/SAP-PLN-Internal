@@ -19,7 +19,7 @@ return [
         ],
     ],
     'contract' => [
-        'label' => 'Kontrak',
+        'label' => 'Pekerjaan',
         'supplier' => 'Pemasok',
         'start_date' => 'Tanggal Mulai',
         'end_date' => 'Tanggal Berakhir',
@@ -69,9 +69,11 @@ return [
     'supplier' => [
         'label' => 'Pemasok',
         'name' => 'Nama',
+        'sales_contact' => 'Kontak Penjualan',
         'sales_name' => 'Nama Kontak Penjualan',
         'sales_phone' => 'Telepon Penjualan',
         'sales_email' => 'Email Penjualan',
+        'logistics_contact' => 'Kontak Logistik',
         'logistics_name' => 'Nama Kontak Logistik',
         'logistics_phone' => 'Telepon Logistik',
         'logistics_email' => 'Email Logistik',
@@ -87,15 +89,6 @@ return [
                 'failed' => ':count baris gagal diekspor.',
             ],
         ],
-    ],
-    'transaction' => [
-        'label' => 'Transaksi',
-        'product' => 'Produk',
-        'transaction_type' => 'Tipe Transaksi',
-        'quantity' => 'Jumlah',
-        'transaction_date' => 'Tanggal Transaksi',
-        'created_at' => 'Dibuat Pada',
-        'updated_at' => 'Diperbarui Pada',
     ],
     'user' => [
         'label' => 'Pengguna',

@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ContractResource\Pages;
 use App\Filament\Resources\ContractResource\RelationManagers;
 use App\Models\Contract;
+use App\Enums\ContractStatus;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -18,10 +19,10 @@ class ContractResource extends Resource
 {
     protected static ?string $model = Contract::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $navigationIcon = 'heroicon-o-briefcase';
 
     protected static ?string $navigationGroup = 'Purchasing';
-    protected static ?int $navigationSort = 20;
+    protected static ?int $navigationSort = 10;
 
     public static function getModelLabel(): string 
     {
@@ -70,8 +71,10 @@ class ContractResource extends Resource
                     ->stripCharacters('.')
                     ->numeric()
                     ->prefix('Rp'),
-                Forms\Components\TextInput::make('status')
+                Forms\Components\Select::make('status')
                     ->label(__('resources.contract.status'))
+                    ->options(ContractStatus::class)
+                    ->enum(ContractStatus::class)
                     ->required(),
             ]);
     }
@@ -98,7 +101,14 @@ class ContractResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->label(__('resources.contract.status'))
-                    ->searchable(),
+                    ->badge()
+                    ->color(fn (ContractStatus $state): string => match($state) {
+                        ContractStatus::Pending => 'warning',
+                        ContractStatus::Active => 'success', 
+                        ContractStatus::Inactive => 'danger',
+                    })
+                    ->formatStateUsing(fn (ContractStatus $state): string => $state->getLabel())
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label(__('resources.contract.created_at'))
                     ->dateTime()
