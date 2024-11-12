@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProductResource\Pages;
-use App\Filament\Resources\ProductResource\RelationManagers;
 use App\Models\Product;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -21,6 +20,7 @@ class ProductResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-cube';
 
     protected static ?string $navigationGroup = 'Master Data';
+
     protected static ?int $navigationSort = 20;
 
     public static function form(Form $form): Form
@@ -31,7 +31,7 @@ class ProductResource extends Resource
                     ->label(__('resources.product.code'))
                     ->required()
                     ->unique()
-                    ->default(fn () => 'PRD-' . str_pad((Product::count() + 1), 5, '0', STR_PAD_LEFT))
+                    ->default(fn () => 'PRD-'.str_pad((Product::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT))
                     ->readOnly(),
                 Forms\Components\TextInput::make('name')
                     ->label(__('resources.product.name'))
@@ -131,7 +131,7 @@ class ProductResource extends Resource
         ];
     }
 
-    public static function getModelLabel(): string 
+    public static function getModelLabel(): string
     {
         return __('resources.product.label');
     }

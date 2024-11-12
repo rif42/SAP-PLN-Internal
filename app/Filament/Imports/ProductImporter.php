@@ -41,8 +41,9 @@ class ProductImporter extends Importer
 
     public function resolveRecord(): ?Product
     {
-        $product = new Product();
-        $product->code = 'PRD-' . str_pad((Product::count() + 1), 5, '0', STR_PAD_LEFT);
+        $product = new Product;
+        $product->code = 'PRD-'.str_pad((Product::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT);
+
         return $product;
     }
 
@@ -51,7 +52,7 @@ class ProductImporter extends Importer
         $body = __('resources.product.notifications.import.completed', ['count' => number_format($import->successful_rows)]);
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . __('resources.product.notifications.import.failed', ['count' => number_format($failedRowsCount)]);
+            $body .= ' '.__('resources.product.notifications.import.failed', ['count' => number_format($failedRowsCount)]);
         }
 
         return $body;

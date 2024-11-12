@@ -2,14 +2,16 @@
 
 namespace App\Enums;
 
-enum ProductStockType: string
+use Filament\Support\Contracts\HasLabel;
+
+enum ProductStockStatus: string implements HasLabel
 {
     case IN = 'in';
     case OUT = 'out';
 
-    public function label(): string
+    public function getLabel(): string
     {
-        return match($this) {
+        return match ($this) {
             self::IN => 'Masuk',
             self::OUT => 'Keluar',
         };

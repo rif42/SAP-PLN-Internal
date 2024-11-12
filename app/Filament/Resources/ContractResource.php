@@ -2,10 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ContractResource\Pages;
-use App\Filament\Resources\ContractResource\RelationManagers;
-use App\Models\Contract;
 use App\Enums\ContractStatus;
+use App\Filament\Resources\ContractResource\Pages;
+use App\Models\Contract;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -22,9 +21,10 @@ class ContractResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-briefcase';
 
     protected static ?string $navigationGroup = 'Purchasing';
+
     protected static ?int $navigationSort = 10;
 
-    public static function getModelLabel(): string 
+    public static function getModelLabel(): string
     {
         return __('resources.contract.label');
     }
@@ -102,9 +102,9 @@ class ContractResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->label(__('resources.contract.status'))
                     ->badge()
-                    ->color(fn (ContractStatus $state): string => match($state) {
+                    ->color(fn (ContractStatus $state): string => match ($state) {
                         ContractStatus::Pending => 'warning',
-                        ContractStatus::Active => 'success', 
+                        ContractStatus::Active => 'success',
                         ContractStatus::Inactive => 'danger',
                     })
                     ->formatStateUsing(fn (ContractStatus $state): string => $state->getLabel())

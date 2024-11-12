@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use App\Enums\ProductStockStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Movement extends Model
 {
@@ -23,6 +24,7 @@ class Movement extends Model
     protected $casts = [
         'date' => 'date',
         'quantity' => 'integer',
+        'type' => ProductStockStatus::class,
     ];
 
     public function getActivitylogOptions(): LogOptions
