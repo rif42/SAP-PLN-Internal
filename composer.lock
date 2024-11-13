@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0deb588e99e483a8f9547396dc424988",
+    "content-hash": "bcb58ef0f151d1740c42a87778bc493a",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -8263,63 +8263,6 @@
     ],
     "packages-dev": [
         {
-            "name": "aaronfrancis/solo",
-            "version": "v0.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/aarondfrancis/solo.git",
-                "reference": "52cff8ec172934c53b489e5fa1b2b5955d90953e"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/aarondfrancis/solo/zipball/52cff8ec172934c53b489e5fa1b2b5955d90953e",
-                "reference": "52cff8ec172934c53b489e5fa1b2b5955d90953e",
-                "shasum": ""
-            },
-            "require": {
-                "ext-pcntl": "*",
-                "illuminate/console": "^10|^11",
-                "illuminate/process": "^10|^11",
-                "illuminate/support": "^10|^11",
-                "joetannenbaum/chewie": "^0.1.7",
-                "php": "^8.2"
-            },
-            "require-dev": {
-                "illuminate/database": "^10|^11",
-                "orchestra/testbench": "^8|^9",
-                "phpunit/phpunit": "^10.5|^11"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "AaronFrancis\\Solo\\Providers\\SoloServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "AaronFrancis\\Solo\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Aaron Francis",
-                    "email": "aarondfrancis@gmail.com"
-                }
-            ],
-            "description": "A Laravel package to run multiple commands at once, to aid in local development.",
-            "support": {
-                "issues": "https://github.com/aarondfrancis/solo/issues",
-                "source": "https://github.com/aarondfrancis/solo/tree/v0.1.0"
-            },
-            "time": "2024-11-07T17:57:12+00:00"
-        },
-        {
             "name": "brianium/paratest",
             "version": "v7.6.0",
             "source": {
@@ -8716,43 +8659,6 @@
                 "source": "https://github.com/Jean85/pretty-package-versions/tree/2.0.6"
             },
             "time": "2024-03-08T09:58:59+00:00"
-        },
-        {
-            "name": "joetannenbaum/chewie",
-            "version": "0.1.7",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/joetannenbaum/chewie.git",
-                "reference": "e093b383144c5fce922b04d556484209bdcb418c"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/joetannenbaum/chewie/zipball/e093b383144c5fce922b04d556484209bdcb418c",
-                "reference": "e093b383144c5fce922b04d556484209bdcb418c",
-                "shasum": ""
-            },
-            "require": {
-                "laravel/prompts": "^0.1.15"
-            },
-            "require-dev": {
-                "pestphp/pest": "^2.33",
-                "tightenco/duster": "^2.7"
-            },
-            "type": "library",
-            "autoload": {
-                "files": [
-                    "src/helpers.php"
-                ],
-                "psr-4": {
-                    "Chewie\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "support": {
-                "issues": "https://github.com/joetannenbaum/chewie/issues",
-                "source": "https://github.com/joetannenbaum/chewie/tree/0.1.7"
-            },
-            "time": "2024-10-20T00:17:58+00:00"
         },
         {
             "name": "laravel/pail",
