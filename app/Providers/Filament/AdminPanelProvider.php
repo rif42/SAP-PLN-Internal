@@ -7,9 +7,9 @@ use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Support\Colors\Color;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -56,14 +56,16 @@ class AdminPanelProvider extends PanelProvider
                     ->setNavigationLabel(__('resources.profile.label'))
                     ->setIcon('heroicon-o-user')
                     ->shouldShowDeleteAccountForm(false)
-                    ->shouldShowAvatarForm(true),
-                FilamentShieldPlugin::make()
+                    ->shouldShowAvatarForm(true)
+                    ->setNavigationGroup('Access')
+                    ->setSort(100),
+                FilamentShieldPlugin::make(),
             ])
             ->databaseNotifications()
             ->colors([
                 'primary' => [
                     50 => '249, 250, 251',
-                    100 => '243, 244, 246', 
+                    100 => '243, 244, 246',
                     200 => '229, 231, 235',
                     300 => '209, 213, 219',
                     400 => '156, 163, 175',
@@ -72,7 +74,7 @@ class AdminPanelProvider extends PanelProvider
                     700 => '55, 65, 81',
                     800 => '31, 41, 55',
                     900 => '17, 24, 39',
-                    950 => '3, 7, 18'
+                    950 => '3, 7, 18',
                 ],
                 'danger' => [
                     50 => '254, 242, 242',
@@ -85,7 +87,7 @@ class AdminPanelProvider extends PanelProvider
                     700 => '185, 28, 28',
                     800 => '153, 27, 27',
                     900 => '127, 29, 29',
-                    950 => '69, 10, 10'
+                    950 => '69, 10, 10',
                 ],
                 'gray' => [
                     50 => '249, 250, 251',
@@ -98,7 +100,7 @@ class AdminPanelProvider extends PanelProvider
                     700 => '55, 65, 81',
                     800 => '31, 41, 55',
                     900 => '17, 24, 39',
-                    950 => '3, 7, 18'
+                    950 => '3, 7, 18',
                 ],
                 'info' => [
                     50 => '239, 246, 255',
@@ -111,7 +113,7 @@ class AdminPanelProvider extends PanelProvider
                     700 => '29, 78, 216',
                     800 => '30, 64, 175',
                     900 => '30, 58, 138',
-                    950 => '23, 37, 84'
+                    950 => '23, 37, 84',
                 ],
                 'success' => [
                     50 => '240, 253, 244',
@@ -124,7 +126,7 @@ class AdminPanelProvider extends PanelProvider
                     700 => '21, 128, 61',
                     800 => '22, 101, 52',
                     900 => '20, 83, 45',
-                    950 => '5, 46, 22'
+                    950 => '5, 46, 22',
                 ],
                 'warning' => [
                     50 => '255, 247, 237',
@@ -137,9 +139,27 @@ class AdminPanelProvider extends PanelProvider
                     700 => '194, 65, 12',
                     800 => '154, 52, 18',
                     900 => '124, 45, 18',
-                    950 => '67, 20, 7'
-                ]
+                    950 => '67, 20, 7',
+                ],
             ])
-            ->darkMode(false);
+            ->darkMode(false)
+            ->navigationGroups([
+                NavigationGroup::make()
+                    ->label('Master Data')
+                    ->icon('heroicon-o-home'),
+                NavigationGroup::make()
+                    ->label('Procurement')
+                    ->icon('heroicon-o-document-text'),
+                NavigationGroup::make()
+                    ->label('Purchasing')
+                    ->icon('heroicon-o-shopping-cart'),
+                NavigationGroup::make()
+                    ->label('Inventory')
+                    ->icon('heroicon-o-cube'),
+                NavigationGroup::make()
+                    ->label('Access')
+                    ->icon('heroicon-o-shield-check'),
+            ])
+            ->sidebarCollapsibleOnDesktop();
     }
 }

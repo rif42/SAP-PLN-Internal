@@ -3,9 +3,20 @@
 return [
     'category' => [
         'label' => 'Categories',
-        'title' => 'Title',
-        'description' => 'Description', 
+        'name' => 'Name',
+        'description' => 'Description',
         'created_at' => 'Created At',
+        'updated_at' => 'Updated At',
+        'notifications' => [
+            'import' => [
+                'completed' => 'Your category import has completed and :count rows were imported.',
+                'failed' => ':count rows failed to import.',
+            ],
+            'export' => [
+                'completed' => 'Your category export has completed and :count rows were exported.',
+                'failed' => ':count rows failed to export.',
+            ],
+        ],
     ],
     'contract' => [
         'label' => 'Contracts',
@@ -15,15 +26,64 @@ return [
         'total_amount' => 'Total Amount',
         'status' => 'Status',
         'created_at' => 'Created At',
+        'updated_at' => 'Updated At',
+    ],
+    'contract_item' => [
+        'label' => 'Contract Items',
+        'contract' => 'Contract',
+        'product' => 'Product',
+        'quantity' => 'Quantity',
+        'unit_price' => 'Unit Price',
+    ],
+    'invoice' => [
+        'label' => 'Invoices',
+        'code' => 'Code',
+        'number' => 'Number',
+        'date' => 'Date',
+        'procurement' => 'Procurement',
+        'supplier' => 'Supplier',
+    ],
+    'invoice_product' => [
+        'label' => 'Invoice Products',
+        'invoice' => 'Invoice',
+        'product' => 'Product',
+        'price' => 'Price',
+        'quantity' => 'Quantity',
+    ],
+    'movement' => [
+        'label' => 'Movements',
+        'date' => 'Date',
+        'product' => 'Product',
+        'type' => 'Type',
+        'quantity' => 'Quantity',
+        'description' => 'Description',
+    ],
+    'procurement' => [
+        'label' => 'Procurements',
+        'code' => 'Code',
+        'number' => 'Number',
+        'supplier' => 'Supplier',
+        'start_date' => 'Start Date',
+        'end_date' => 'End Date',
+    ],
+    'procurement_product' => [
+        'label' => 'Procurement Products',
+        'procurement' => 'Procurement',
+        'product' => 'Name',
+        'price' => 'Price',
+        'quantity' => 'Quantity',
     ],
     'product' => [
         'label' => 'Products',
+        'code' => 'Code',
         'name' => 'Name',
         'category' => 'Category',
         'barcode' => 'Barcode',
         'description' => 'Description',
         'price' => 'Price',
+        'stock' => 'Stock',
         'created_at' => 'Created At',
+        'updated_at' => 'Updated At',
         'notifications' => [
             'import' => [
                 'completed' => 'Your product import has completed and :count rows were imported.',
@@ -35,6 +95,22 @@ return [
             ],
         ],
     ],
+    'product_stock' => [
+        'label' => 'Product Stock',
+        'product' => 'Product',
+        'quantity' => 'Quantity',
+        'type' => 'Type',
+    ],
+    'product_stock_adjustment' => [
+        'label' => 'Stock Adjustments',
+        'product' => 'Product',
+        'quantity' => 'Quantity',
+        'reason' => 'Reason',
+        'type' => 'Type',
+    ],
+    'profile' => [
+        'label' => 'Profile',
+    ],
     'purchase' => [
         'label' => 'Purchases',
         'supplier' => 'Supplier',
@@ -43,23 +119,36 @@ return [
         'quantity' => 'Quantity',
         'price' => 'Price',
         'created_at' => 'Created At',
+        'updated_at' => 'Updated At',
     ],
-    'stock' => [
-        'label' => 'Stock',
+    'shipping_document' => [
+        'label' => 'Shipping Documents',
+        'code' => 'Code',
+        'number' => 'Number',
+        'invoice' => 'Invoice',
+        'supplier' => 'Supplier',
+        'procurement' => 'Procurement',
+    ],
+    'shipping_document_product' => [
+        'label' => 'Shipping Document Products',
+        'shipping_document' => 'Shipping Document',
         'product' => 'Product',
+        'price' => 'Price',
         'quantity' => 'Quantity',
-        'created_at' => 'Created At',
     ],
     'supplier' => [
         'label' => 'Suppliers',
         'name' => 'Name',
+        'sales_contact' => 'Sales Contact',
         'sales_name' => 'Sales Contact Name',
         'sales_phone' => 'Sales Phone',
         'sales_email' => 'Sales Email',
+        'logistics_contact' => 'Logistics Contact',
         'logistics_name' => 'Logistics Contact Name',
         'logistics_phone' => 'Logistics Phone',
         'logistics_email' => 'Logistics Email',
         'created_at' => 'Created At',
+        'updated_at' => 'Updated At',
         'notifications' => [
             'import' => [
                 'completed' => 'Your supplier import has completed and :count rows were imported.',
@@ -71,19 +160,12 @@ return [
             ],
         ],
     ],
-    'transaction' => [
-        'label' => 'Transactions',
-        'product' => 'Product',
-        'transaction_type' => 'Transaction Type',
-        'quantity' => 'Quantity',
-        'transaction_date' => 'Transaction Date',
-        'created_at' => 'Created At',
-    ],
     'user' => [
         'label' => 'Users',
         'name' => 'Name',
         'email' => 'Email',
         'password' => 'Password',
+        'avatar' => 'Avatar',
         'created_at' => 'Created At',
         'updated_at' => 'Updated At',
         'notifications' => [
@@ -96,17 +178,13 @@ return [
                 'failed' => ':count rows failed to export.',
             ],
         ],
-        'avatar' => 'Avatar',
-    ],
-    'profile' => [
-        'label' => 'Profil',
     ],
     'navigation' => [
         'groups' => [
             'master_data' => 'Master Data',
             'inventory' => 'Inventory Management',
             'purchasing' => 'Purchasing',
-            'access' => 'Access Management',
+            'access' => 'Access',
         ],
     ],
 ];
