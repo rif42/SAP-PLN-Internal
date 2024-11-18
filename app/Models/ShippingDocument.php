@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ProductStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -19,7 +20,23 @@ class ShippingDocument extends Model
         'invoice_id',
         'supplier_id',
         'procurement_id',
+        'status',
+        'status_at',
     ];
+
+    protected $casts = [
+        'status' => ProductStatus::class,
+        'status_at' => 'datetime',
+    ];
+
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            if ($model->status && !$model->status_at) {
+                $model->status_at = now();
+            }
+        });
+    }
 
     public function getActivitylogOptions(): LogOptions
     {

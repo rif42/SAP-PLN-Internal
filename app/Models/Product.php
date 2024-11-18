@@ -84,4 +84,9 @@ class Product extends Model
     {
         return $this->hasMany(ShippingDocumentProduct::class);
     }
+
+    public function contractProducts(): HasMany
+    {
+        return $this->hasMany(ContractProduct::class);
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ProductStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -17,12 +18,25 @@ class ProcurementProduct extends Model
         'product_id',
         'price',
         'quantity',
+        'status',
+        'status_at',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'quantity' => 'integer',
+        'status' => ProductStatus::class,
+        'status_at' => 'datetime',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            if ($model->status && !$model->status_at) {
+                $model->status_at = now();
+            }
+        });
+    }
 
     public function getActivitylogOptions(): LogOptions
     {

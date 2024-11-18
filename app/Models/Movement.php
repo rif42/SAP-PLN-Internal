@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ProductStatus;
 use App\Enums\ProductStockStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,12 +20,16 @@ class Movement extends Model
         'type',
         'quantity',
         'description',
+        'status',
+        'status_at',
     ];
 
     protected $casts = [
         'date' => 'date',
         'quantity' => 'integer',
         'type' => ProductStockStatus::class,
+        'status' => ProductStatus::class,
+        'status_at' => 'datetime',
     ];
 
     public function getActivitylogOptions(): LogOptions

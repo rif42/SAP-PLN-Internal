@@ -20,13 +20,24 @@ class Contract extends Model
         'end_date',
         'total_amount',
         'status',
+        'status_at',
     ];
 
     protected $casts = [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
         'status' => ContractStatus::class,
+        'status_at' => 'datetime',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            if ($model->status && !$model->status_at) {
+                $model->status_at = now();
+            }
+        });
+    }
 
     public function getActivitylogOptions(): LogOptions
     {
