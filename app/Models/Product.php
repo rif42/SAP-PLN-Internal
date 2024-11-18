@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -36,14 +35,14 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
-    public function transactions(): HasMany
-    {
-        return $this->hasMany(Transaction::class);
-    }
-
     public function purchases(): HasMany
     {
         return $this->hasMany(Purchase::class);
+    }
+
+    public function purchaseProducts(): HasMany
+    {
+        return $this->hasMany(PurchaseProduct::class);
     }
 
     public function contractItems(): HasMany
@@ -51,13 +50,38 @@ class Product extends Model
         return $this->hasMany(ContractItem::class);
     }
 
-    public function productStocks(): HasMany
-    {
-        return $this->hasMany(ProductStock::class);
-    }
-
     public function procurementProducts(): HasMany
     {
         return $this->hasMany(ProcurementProduct::class);
+    }
+
+    public function invoiceProducts(): HasMany
+    {
+        return $this->hasMany(InvoiceProduct::class);
+    }
+
+    public function movements(): HasMany
+    {
+        return $this->hasMany(Movement::class);
+    }
+
+    public function stockAdjustments(): HasMany
+    {
+        return $this->hasMany(ProductStockAdjustment::class);
+    }
+
+    public function stockLogs(): HasMany
+    {
+        return $this->hasMany(ProductStockLog::class);
+    }
+
+    public function stockRecaps(): HasMany
+    {
+        return $this->hasMany(ProductStockRecap::class);
+    }
+
+    public function shippingDocumentProducts(): HasMany
+    {
+        return $this->hasMany(ShippingDocumentProduct::class);
     }
 }

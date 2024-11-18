@@ -17,7 +17,7 @@ class Invoice extends Model
         'code',
         'number',
         'date',
-        'procurement_id',
+        'purchase_id',
         'supplier_id',
     ];
 
@@ -28,13 +28,13 @@ class Invoice extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['code', 'number', 'date', 'procurement.code', 'supplier.name'])
+            ->logOnly(['code', 'number', 'date', 'purchase.code', 'supplier.name'])
             ->logOnlyDirty();
     }
 
-    public function procurement(): BelongsTo
+    public function purchase(): BelongsTo
     {
-        return $this->belongsTo(Procurement::class);
+        return $this->belongsTo(Purchase::class);
     }
 
     public function supplier(): BelongsTo
