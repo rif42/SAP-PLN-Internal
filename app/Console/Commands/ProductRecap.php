@@ -38,8 +38,8 @@ class ProductRecap extends Command
                 CURRENT_DATE,
                 id as product_id,
                 stock as quantity,
-                NOW(),
-                NOW()
+                datetime(CURRENT_TIMESTAMP, '+7 hours'),
+                datetime(CURRENT_TIMESTAMP, '+7 hours')
             FROM products 
             WHERE deleted_at IS NULL
         ");
