@@ -20,7 +20,7 @@ class InvoiceResource extends Resource
 
     protected static ?string $navigationGroup = 'Procurement';
 
-    protected static ?int $navigationSort = 20;
+    protected static ?int $navigationSort = 30;
 
     public static function getModelLabel(): string
     {
