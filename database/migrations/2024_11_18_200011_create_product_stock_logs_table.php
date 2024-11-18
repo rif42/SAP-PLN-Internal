@@ -18,6 +18,7 @@ return new class extends Migration
             $table->enum('type', ['in', 'out'])->default('in');
             $table->nullableMorphs('causer');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
