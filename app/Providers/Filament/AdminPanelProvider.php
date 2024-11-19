@@ -157,6 +157,9 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Inventory')
                     ->icon('heroicon-o-cube'),
                 NavigationGroup::make()
+                    ->label('Report')
+                    ->icon('heroicon-o-chart-bar'),
+                NavigationGroup::make()
                     ->label('Access')
                     ->icon('heroicon-o-shield-check'),
             ])

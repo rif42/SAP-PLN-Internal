@@ -124,6 +124,16 @@ return [
         'quantity' => 'Jumlah',
         'type' => 'Tipe',
     ],
+    'product_stock_log' => [
+        'label' => 'Aktivitas Stok Barang',
+        'product' => 'Barang',
+        'quantity' => 'Jumlah',
+        'type' => 'Tipe',
+        'causer' => 'Penyebab',
+        'causer_id' => 'Penyebab ID',
+        'causer_type' => 'Penyebab Tipe',
+        'created_at' => 'Dibuat Pada',
+    ],
     'product_stock_adjustment' => [
         'label' => 'Perubahan Stok',
         'product' => 'Barang',
