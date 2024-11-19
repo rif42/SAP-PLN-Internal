@@ -93,6 +93,13 @@ class ProductStockRecapResource extends Resource
                     ->defaultThisMonth()
                     ->withIndicator()
                     ->timezone(config('app.timezone')),
+                Tables\Filters\TernaryFilter::make('zero_quantity')
+                    ->label(__('resources.product_stock_recap.zero_quantity'))
+                    ->queries(
+                        true: fn (Builder $query) => $query->where('quantity', 0),
+                        false: fn (Builder $query) => $query->where('quantity', '>', 0),
+                        blank: fn (Builder $query) => $query
+                    ),
             ])
             ->actions([])
             ->bulkActions([]);

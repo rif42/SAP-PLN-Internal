@@ -145,6 +145,7 @@ return [
                 'failed' => ':count rows failed to export.',
             ],
         ],
+        'zero_quantity' => 'Show Zero Quantity',
     ],
     'product_stock_adjustment' => [
         'label' => 'Stock Adjustments',

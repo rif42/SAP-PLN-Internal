@@ -139,6 +139,7 @@ return [
         'date' => 'Tanggal',
         'product' => 'Barang',
         'quantity' => 'Jumlah',
+        'zero_quantity' => 'Tampilkan Stok Kosong',
     ],
     'product_stock_adjustment' => [
         'label' => 'Perubahan Stok',
