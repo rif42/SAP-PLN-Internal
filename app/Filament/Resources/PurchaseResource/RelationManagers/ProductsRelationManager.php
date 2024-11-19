@@ -1,12 +1,10 @@
 <?php
 
-namespace App\Filament\Resources\ShippingDocumentResource\RelationManagers;
+namespace App\Filament\Resources\PurchaseResource\RelationManagers;
 
 use App\Enums\ProductStatus;
-use App\Enums\ProductStockStatus;
 use App\Models\Product;
-use App\Models\ProductStockLog;
-use App\Models\ShippingDocumentProduct;
+use App\Models\PurchaseProduct;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -15,7 +13,6 @@ use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ProductsRelationManager extends RelationManager
@@ -29,31 +26,31 @@ class ProductsRelationManager extends RelationManager
         return $form
             ->schema([
                 Forms\Components\Select::make('product_id')
-                    ->label(__('resources.shipping_document_product.product'))
+                    ->label(__('resources.purchase_product.product'))
                     ->options(function ($get) {
-                        $shippingDocument = $this->getOwnerRecord();
-                        $invoiceProducts = $shippingDocument->invoice->products;
+                        $purchase = $this->getOwnerRecord();
+                        $procurementProducts = $purchase->procurement->products;
 
-                        return $invoiceProducts->mapToGroups(function ($invoiceProduct) {
+                        return $procurementProducts->mapToGroups(function ($procurementProduct) {
+                            // Map each product to an array with its details
                             return [
-                                $invoiceProduct->product->id => [
-                                    'id' => $invoiceProduct->product->id,
+                                $procurementProduct->product->id => [
+                                    'id' => $procurementProduct->product->id,
                                     'label' => sprintf(
                                         '%s - %s',
-                                        $invoiceProduct->product->code,
-                                        $invoiceProduct->product->name
+                                        $procurementProduct->product->code,
+                                        $procurementProduct->product->name
                                     ),
-                                    'quantity' => $invoiceProduct->quantity,
+                                    'quantity' => $procurementProduct->quantity,
                                 ],
                             ];
-                        })->map(function ($items) use ($shippingDocument) {
+                        })->map(function ($items) use ($purchase) {
                             // Get the product label
                             $label = $items->first()['label'];
                             
                             // Calculate quantities
                             $totalQuantity = $items->sum('quantity');
-
-                            $usedQuantity = $shippingDocument->products()
+                            $usedQuantity = $purchase->products()
                                 ->where('product_id', $items->first()['id'])
                                 ->sum('quantity');
                             $remainingQuantity = $totalQuantity - $usedQuantity;
@@ -70,17 +67,17 @@ class ProductsRelationManager extends RelationManager
                     ->required()
                     ->live()
                     ->rules([
-                        function (Get $get, ?ShippingDocumentProduct $record = null) {
+                        function (Get $get, ?PurchaseProduct $record = null) {
                             return function (string $attribute, $value, \Closure $fail) use ($record) {
-                                $shippingDocument = $this->getOwnerRecord();
+                                $purchase = $this->getOwnerRecord();
                                 
-                                // Get total quantity from invoice
-                                $invoiceProductQuantity = $shippingDocument->invoice->products()
+                                // Get total quantity from procurement
+                                $procurementProductQuantity = $purchase->procurement->products()
                                     ->where('product_id', $value)
                                     ->sum('quantity');
 
-                                // Get used quantity from shipping documents
-                                $usedQuantity = $shippingDocument->products()
+                                // Get used quantity from purchases
+                                $usedQuantity = $purchase->products()
                                     ->where('product_id', $value)
                                     ->sum('quantity');
 
@@ -89,7 +86,7 @@ class ProductsRelationManager extends RelationManager
                                     $usedQuantity -= $record->quantity;
                                 }
 
-                                $remainingQuantity = $invoiceProductQuantity - $usedQuantity;
+                                $remainingQuantity = $procurementProductQuantity - $usedQuantity;
 
                                 if ($remainingQuantity <= 0) {
                                     $fail("Jumlah barang ini sudah habis");
@@ -102,59 +99,59 @@ class ProductsRelationManager extends RelationManager
                             return;
                         }
 
-                        $shippingDocument = $this->getOwnerRecord();
+                        $purchase = $this->getOwnerRecord();
                         
-                        // Get invoice product details
-                        $invoiceProduct = $shippingDocument->invoice->products()
+                        // Get procurement product details
+                        $procurementProduct = $purchase->procurement->products()
                             ->where('product_id', $state)
                             ->first();
 
-                        if (!$invoiceProduct) {
+                        if (!$procurementProduct) {
                             return;
                         }
                         
-                        // Set price from invoice
-                        $set('price', number_format($invoiceProduct->price, 0, ',', '.'));
+                        // Set price from procurement
+                        $set('price', number_format($procurementProduct->price, 0, ',', '.'));
 
                         // Calculate remaining quantity
-                        $invoiceProductQuantity = $shippingDocument->invoice->products()
+                        $procurementProductQuantity = $purchase->procurement->products()
                             ->where('product_id', $state)
                             ->sum('quantity');
 
-                        $usedQuantity = $shippingDocument->products()
+                        $usedQuantity = $purchase->products()
                             ->where('product_id', $state)
                             ->sum('quantity');
 
-                        $remainingQuantity = $invoiceProductQuantity - $usedQuantity;
+                        $remainingQuantity = $procurementProductQuantity - $usedQuantity;
 
                         // Set initial quantity to remaining stock
                         $set('quantity', max(0, $remainingQuantity));
                     }),
                 Forms\Components\TextInput::make('price')
-                    ->label(__('resources.shipping_document_product.price'))
+                    ->label(__('resources.purchase_product.price'))
                     ->required()
                     ->mask(RawJs::make('$money($input, \',\')'))
                     ->stripCharacters('.')
                     ->numeric()
                     ->prefix('Rp'),
                 Forms\Components\TextInput::make('quantity')
-                    ->label(__('resources.shipping_document_product.quantity'))
+                    ->label(__('resources.purchase_product.quantity'))
                     ->required()
                     ->numeric()
                     ->rules([
-                        function (Get $get, ?ShippingDocumentProduct $record = null) {
+                        function (Get $get, ?PurchaseProduct $record = null) {
                             $product_id = $get('product_id');
 
                             return function (string $attribute, $value, \Closure $fail) use ($product_id, $record) {
-                                $shippingDocument = $this->getOwnerRecord();
+                                $purchase = $this->getOwnerRecord();
 
-                                // Get total quantity from invoice
-                                $invoiceQuantity = $shippingDocument->invoice->products()
+                                // Get total quantity from procurement
+                                $procurementQuantity = $purchase->procurement->products()
                                     ->where('product_id', $product_id)
                                     ->sum('quantity');
 
-                                // Get quantity already used in other shipping document records
-                                $quantityInUse = $shippingDocument->products()
+                                // Get quantity already used in other purchase records
+                                $quantityInUse = $purchase->products()
                                     ->where('product_id', $product_id)
                                     ->sum('quantity');
 
@@ -164,7 +161,7 @@ class ProductsRelationManager extends RelationManager
                                 }
 
                                 // Calculate how many items are still available
-                                $availableQuantity = $invoiceQuantity - $quantityInUse;
+                                $availableQuantity = $procurementQuantity - $quantityInUse;
                                 
                                 // Check if requested quantity exceeds available amount
                                 $quantityAfterRequest = $availableQuantity - $value;
@@ -175,53 +172,11 @@ class ProductsRelationManager extends RelationManager
                         }
                     ]),
                 Forms\Components\Select::make('status')
-                    ->label(__('resources.shipping_document_product.status'))
+                    ->label(__('resources.purchase_product.status'))
                     ->options(ProductStatus::class)
                     ->enum(ProductStatus::class)
                     ->default(ProductStatus::PENDING)
-                    ->required()
-                    ->afterStateUpdated(function ($state, $record, $get) {
-                        // For new records (no $record) that are set to done immediately
-                        if ($state === 'done' && !$record) {
-                            $productId = $get('product_id');
-                            $quantity = $get('quantity');
-
-                            // Increase product stock
-                            Product::where('id', $productId)->increment('stock', $quantity);
-
-                            // Stock log will be created after record is saved
-                            return;
-                        }
-
-                        // For existing records being updated
-                        if ($state === 'done' && $record && $record->status !== ProductStatus::DONE) {
-                            // Increase product stock
-                            Product::where('id', $record->product_id)->increment('stock', $record->quantity);
-
-                            // Create stock log
-                            ProductStockLog::create([
-                                'product_id' => $record->product_id,
-                                'quantity' => $record->quantity,
-                                'type' => ProductStockStatus::IN,
-                                'causer_type' => get_class($record),
-                                'causer_id' => $record->id
-                            ]);
-                        }
-                        
-                        if ($state !== 'done' && $record && $record->status === ProductStatus::DONE) {
-                            // Decrease product stock
-                            Product::where('id', $record->product_id)->decrement('stock', $record->quantity);
-
-                            // Create stock log
-                            ProductStockLog::create([
-                                'product_id' => $record->product_id,
-                                'quantity' => $record->quantity,
-                                'type' => ProductStockStatus::OUT,
-                                'causer_type' => get_class($record),
-                                'causer_id' => $record->id
-                            ]);
-                        }
-                    }),
+                    ->required(),
             ]);
     }
 
@@ -231,22 +186,22 @@ class ProductsRelationManager extends RelationManager
             ->recordTitleAttribute('product.name')
             ->columns([
                 Tables\Columns\TextColumn::make('product.name')
-                    ->label(__('resources.shipping_document_product.product'))
+                    ->label(__('resources.purchase_product.product'))
                     ->formatStateUsing(fn ($record) => $record->product->code.' - '.$record->product->name)
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('price')
-                    ->label(__('resources.shipping_document_product.price'))
+                    ->label(__('resources.purchase_product.price'))
                     ->money('IDR')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('quantity')
-                    ->label(__('resources.shipping_document_product.quantity'))
+                    ->label(__('resources.purchase_product.quantity'))
                     ->numeric()
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
-                    ->label(__('resources.shipping_document_product.status'))
+                    ->label(__('resources.purchase_product.status'))
                     ->badge()
                     ->color(fn (ProductStatus $state): string => match ($state) {
                         ProductStatus::CANCELED => 'danger',
@@ -256,17 +211,17 @@ class ProductsRelationManager extends RelationManager
                     ->formatStateUsing(fn (ProductStatus $state): string => $state->getLabel())
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status_at')
-                    ->label(__('resources.shipping_document_product.status_at'))
+                    ->label(__('resources.purchase_product.status_at'))
                     ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label(__('resources.shipping_document_product.created_at'))
+                    ->label(__('resources.purchase_product.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label(__('resources.shipping_document_product.updated_at'))
+                    ->label(__('resources.purchase_product.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -279,43 +234,11 @@ class ProductsRelationManager extends RelationManager
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make()
-                    ->before(function ($record) {
-                        if ($record->status === ProductStatus::DONE) {
-                            // Decrease product stock
-                            Product::where('id', $record->product_id)->decrement('stock', $record->quantity);
-
-                            // Create stock log
-                            ProductStockLog::create([
-                                'product_id' => $record->product_id,
-                                'quantity' => $record->quantity,
-                                'type' => ProductStockStatus::OUT,
-                                'causer_type' => get_class($record),
-                                'causer_id' => $record->id
-                            ]);
-                        }
-                    }),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
-                        ->before(function (Collection $records) {
-                            foreach ($records as $record) {
-                                if ($record->status === ProductStatus::DONE) {
-                                    // Decrease product stock
-                                    Product::where('id', $record->product_id)->decrement('stock', $record->quantity);
-
-                                    // Create stock log
-                                    ProductStockLog::create([
-                                        'product_id' => $record->product_id,
-                                        'quantity' => $record->quantity,
-                                        'type' => ProductStockStatus::OUT,
-                                        'causer_type' => get_class($record),
-                                        'causer_id' => $record->id
-                                    ]);
-                                }
-                            }
-                        }),
+                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

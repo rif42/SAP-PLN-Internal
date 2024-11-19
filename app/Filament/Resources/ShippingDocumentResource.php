@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\ProductStatus;
 use App\Filament\Resources\ShippingDocumentResource\Pages;
 use App\Filament\Resources\ShippingDocumentResource\RelationManagers\ProductsRelationManager;
 use App\Models\ShippingDocument;
@@ -10,6 +11,8 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ShippingDocumentResource extends Resource
 {
@@ -55,25 +58,20 @@ class ShippingDocumentResource extends Resource
                     ->label(__('resources.shipping_document.number'))
                     ->required()
                     ->unique(ignoreRecord: true),
-                Forms\Components\Select::make('procurement_id')
-                    ->label(__('resources.shipping_document.procurement'))
-                    ->relationship('procurement', 'code')
-                    ->required()
-                    ->searchable()
-                    ->live(),
                 Forms\Components\Select::make('invoice_id')
                     ->label(__('resources.shipping_document.invoice'))
-                    ->relationship('invoice', 'code', function ($query, $get) {
-                        $procurementId = $get('procurement_id');
-                        if ($procurementId) {
-                            return $query->where('procurement_id', $procurementId);
-                        }
-
-                        return $query->whereNull('id');
-                    })
+                    ->relationship('invoice', 'code', fn (Builder $query) => $query->selectRaw("id, code || ' - ' || number as code"))
                     ->required()
                     ->searchable()
-                    ->helperText(fn ($get) => ! filled($get('procurement_id')) ? 'Pilih procurement terlebih dahulu' : null),
+                    ->live()
+                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                        if ($state) {
+                            $invoice = \App\Models\Invoice::find($state);
+                            if ($invoice) {
+                                $set('supplier_id', $invoice->supplier_id);
+                            }
+                        }
+                    }),
                 Forms\Components\Select::make('supplier_id')
                     ->label(__('resources.shipping_document.supplier'))
                     ->relationship('supplier', 'name')
@@ -111,6 +109,12 @@ class ShippingDocumentResource extends Resource
                                     ->email(),
                             ])->columns(3),
                     ]),
+                Forms\Components\Select::make('status')
+                    ->label(__('resources.shipping_document.status'))
+                    ->options(ProductStatus::class)
+                    ->enum(ProductStatus::class)
+                    ->default(ProductStatus::PENDING)
+                    ->required(),
             ]);
     }
 
@@ -131,31 +135,61 @@ class ShippingDocumentResource extends Resource
                     ->label(__('resources.shipping_document.supplier'))
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('procurement.code')
-                    ->label(__('resources.shipping_document.procurement'))
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label(__('resources.shipping_document.status'))
+                    ->badge()
+                    ->color(fn (ProductStatus $state): string => match ($state) {
+                        ProductStatus::CANCELED => 'danger',
+                        ProductStatus::PENDING => 'warning',
+                        ProductStatus::DONE => 'success',
+                    })
+                    ->formatStateUsing(fn (ProductStatus $state): string => $state->getLabel())
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('status_at')
+                    ->label(__('resources.shipping_document.status_at'))
+                    ->dateTime('d M Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label(__('resources.shipping_document.created_at'))
+                    ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->label(__('resources.shipping_document.updated_at'))
+                    ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('deleted_at')
-                    ->dateTime()
+                    ->label(__('resources.shipping_document.deleted_at'))
+                    ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('invoice')
+                    ->label(__('resources.invoice.invoice'))
+                    ->relationship('invoice', 'code')
+                    ->searchable()
+                    ->preload(),
+                Tables\Filters\SelectFilter::make('supplier')
+                    ->label(__('resources.shipping_document.supplier'))
+                    ->relationship('supplier', 'name')
+                    ->searchable()
+                    ->preload(),
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ForceDeleteAction::make(),
+                Tables\Actions\RestoreAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
                 ]),
             ]);
     }
@@ -174,5 +208,13 @@ class ShippingDocumentResource extends Resource
             'create' => Pages\CreateShippingDocument::route('/create'),
             'edit' => Pages\EditShippingDocument::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
     }
 }

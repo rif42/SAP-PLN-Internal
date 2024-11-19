@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Filament\Resources\InvoiceResource\RelationManagers;
+namespace App\Filament\Resources\PurchaseResource\RelationManagers;
 
 use App\Enums\ProductStatus;
-use App\Filament\Resources\ShippingDocumentResource;
-use App\Models\ShippingDocument;
+use App\Filament\Resources\InvoiceResource;
+use App\Models\Invoice;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -13,31 +13,36 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class ShippingDocumentsRelationManager extends RelationManager
+class InvoicesRelationManager extends RelationManager
 {
-    protected static string $relationship = 'shippingDocuments';
+    protected static string $relationship = 'invoices';
 
-    protected static ?string $title = 'Surat Jalan';
+    protected static ?string $title = 'Faktur';
 
     public function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('code')
-                    ->label(__('resources.shipping_document.code'))
+                    ->label(__('resources.invoice.code'))
                     ->required()
                     ->unique(ignoreRecord: true)
-                    ->default(fn () => 'SHP-'.str_pad((ShippingDocument::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT))
+                    ->default(fn () => 'INV-'.str_pad((Invoice::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT))
                     ->readOnly(),
                 Forms\Components\TextInput::make('number')
-                    ->label(__('resources.shipping_document.number'))
+                    ->label(__('resources.invoice.number'))
                     ->required()
                     ->unique(ignoreRecord: true),
+                Forms\Components\DatePicker::make('date')
+                    ->label(__('resources.invoice.date'))
+                    ->default(now())
+                    ->required(),
                 Forms\Components\Select::make('supplier_id')
-                    ->label(__('resources.shipping_document.supplier'))
+                    ->label(__('resources.invoice.supplier'))
                     ->relationship('supplier', 'name')
                     ->required()
                     ->searchable()
+                    ->default(fn ($livewire) => $livewire->ownerRecord->supplier_id)
                     ->createOptionForm([
                         Forms\Components\TextInput::make('name')
                             ->label(__('resources.supplier.name'))
@@ -71,7 +76,7 @@ class ShippingDocumentsRelationManager extends RelationManager
                             ])->columns(3),
                     ]),
                 Forms\Components\Select::make('status')
-                    ->label(__('resources.shipping_document.status'))
+                    ->label(__('resources.invoice.status'))
                     ->options(ProductStatus::class)
                     ->enum(ProductStatus::class)
                     ->default(ProductStatus::PENDING)
@@ -82,22 +87,24 @@ class ShippingDocumentsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->recordTitleAttribute('code')
             ->columns([
                 Tables\Columns\TextColumn::make('code')
-                    ->label(__('resources.shipping_document.code'))
+                    ->label(__('resources.invoice.code'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('number')
-                    ->label(__('resources.shipping_document.number'))
+                    ->label(__('resources.invoice.number'))
                     ->searchable(),
-                Tables\Columns\TextColumn::make('invoice.code')
-                    ->label(__('resources.shipping_document.invoice'))
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('date')
+                    ->label(__('resources.invoice.date'))
+                    ->date('d M Y')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('supplier.name')
-                    ->label(__('resources.shipping_document.supplier'))
+                    ->label(__('resources.invoice.supplier'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
-                    ->label(__('resources.shipping_document.status'))
+                    ->label(__('resources.invoice.status'))
                     ->badge()
                     ->color(fn (ProductStatus $state): string => match ($state) {
                         ProductStatus::CANCELED => 'danger',
@@ -105,48 +112,42 @@ class ShippingDocumentsRelationManager extends RelationManager
                         ProductStatus::DONE => 'success',
                     })
                     ->formatStateUsing(fn (ProductStatus $state): string => $state->getLabel())
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('status_at')
-                    ->label(__('resources.shipping_document.status_at'))
+                    ->label(__('resources.invoice.status_at'))
                     ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label(__('resources.shipping_document.created_at'))
+                    ->label(__('resources.invoice.created_at'))
                     ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label(__('resources.shipping_document.updated_at'))
+                    ->label(__('resources.invoice.updated_at'))
                     ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('deleted_at')
-                    ->label(__('resources.shipping_document.deleted_at'))
+                    ->label(__('resources.invoice.deleted_at'))
                     ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('invoice')
-                    ->label(__('resources.invoice.invoice'))
-                    ->relationship('invoice', 'code')
-                    ->searchable()
-                    ->preload(),
+                Tables\Filters\TrashedFilter::make(),
                 Tables\Filters\SelectFilter::make('supplier')
-                    ->label(__('resources.shipping_document.supplier'))
+                    ->label(__('resources.invoice.supplier'))
                     ->relationship('supplier', 'name')
                     ->searchable()
                     ->preload(),
-                Tables\Filters\TrashedFilter::make(),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
-                    ->url(fn (ShippingDocument $record): string => ShippingDocumentResource::getUrl('edit', ['record' => $record]))
+                    ->url(fn (Invoice $record): string => InvoiceResource::getUrl('edit', ['record' => $record]))
                     ->icon('heroicon-m-pencil-square')
                     ->openUrlInNewTab(),
                 Tables\Actions\DeleteAction::make(),

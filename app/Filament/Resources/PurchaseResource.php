@@ -2,14 +2,15 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\ProductStatus;
 use App\Filament\Resources\PurchaseResource\Pages;
 use App\Filament\Resources\PurchaseResource\RelationManagers;
-use App\Models\Product;
+use App\Filament\Resources\PurchaseResource\RelationManagers\InvoicesRelationManager;
+use App\Filament\Resources\PurchaseResource\RelationManagers\ProductsRelationManager;
 use App\Models\Purchase;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -22,10 +23,49 @@ class PurchaseResource extends Resource
     protected static ?string $navigationGroup = 'Procurement';
     protected static ?int $navigationSort = 20;
 
+    public static function getModelLabel(): string 
+    {
+        return __('resources.purchase.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('resources.purchase.label');
+    }
+
+    public static function getBreadcrumb(): string
+    {
+        return __('resources.purchase.label');
+    }
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
+                Forms\Components\TextInput::make('code')
+                    ->label(__('resources.purchase.code'))
+                    ->required()
+                    ->unique(ignoreRecord: true)
+                    ->default(fn () => 'PUR-'.str_pad((Purchase::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT))
+                    ->readOnly(),
+                Forms\Components\TextInput::make('number')
+                    ->label(__('resources.purchase.number'))
+                    ->required()
+                    ->unique(ignoreRecord: true),
+                Forms\Components\Select::make('procurement_id')
+                    ->label(__('resources.purchase.procurement'))
+                    ->relationship('procurement', 'code', fn (Builder $query) => $query->selectRaw("id, code || ' - ' || number as code"))
+                    ->required()
+                    ->searchable()
+                    ->live()
+                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                        if ($state) {
+                            $procurement = \App\Models\Procurement::find($state);
+                            if ($procurement) {
+                                $set('supplier_id', $procurement->supplier_id);
+                            }
+                        }
+                    }),
                 Forms\Components\Select::make('supplier_id')
                     ->label(__('resources.purchase.supplier'))
                     ->relationship('supplier', 'name')
@@ -36,66 +76,42 @@ class PurchaseResource extends Resource
                             ->label(__('resources.supplier.name'))
                             ->required()
                             ->columnSpanFull(),
-                        Forms\Components\Textarea::make('contact_info')
-                            ->label(__('resources.supplier.contact_info'))
-                            ->required()
-                            ->columnSpanFull(),
+                        Forms\Components\Section::make(__('resources.supplier.sales_contact'))
+                            ->schema([
+                                Forms\Components\TextInput::make('sales_name')
+                                    ->label(__('resources.supplier.sales_name'))
+                                    ->required(),
+                                Forms\Components\TextInput::make('sales_phone')
+                                    ->label(__('resources.supplier.sales_phone'))
+                                    ->required()
+                                    ->tel(),
+                                Forms\Components\TextInput::make('sales_email')
+                                    ->label(__('resources.supplier.sales_email'))
+                                    ->email(),
+                            ])->columns(3),
+                        Forms\Components\Section::make(__('resources.supplier.logistics_contact'))
+                            ->schema([
+                                Forms\Components\TextInput::make('logistics_name')
+                                    ->label(__('resources.supplier.logistics_name'))
+                                    ->required(),
+                                Forms\Components\TextInput::make('logistics_phone')
+                                    ->label(__('resources.supplier.logistics_phone'))
+                                    ->required()
+                                    ->tel(),
+                                Forms\Components\TextInput::make('logistics_email')
+                                    ->label(__('resources.supplier.logistics_email'))
+                                    ->email(),
+                            ])->columns(3),
                     ]),
-                Forms\Components\Select::make('product_id')
-                    ->label(__('resources.purchase.product'))
-                    ->relationship('product', 'name')
-                    ->required()
-                    ->searchable()
-                    ->live()
-                    ->afterStateUpdated(function ($state, Forms\Set $set) {
-                        if ($state) {
-                            $product = Product::find($state);
-                            if ($product) {
-                                $set('price', number_format($product->price, 0, ',', '.'));
-                            }
-                        }
-                    })
-                    ->createOptionForm([
-                        Forms\Components\TextInput::make('name')
-                            ->label(__('resources.product.name'))
-                            ->required(),
-                        Forms\Components\Select::make('category_id')
-                            ->label(__('resources.product.category'))
-                            ->relationship('category', 'name')
-                            ->required()
-                            ->searchable(),
-                        Forms\Components\TextInput::make('barcode')
-                            ->label(__('resources.product.barcode'))
-                            ->required()
-                            ->numeric(),
-                        Forms\Components\TextInput::make('price')
-                            ->label(__('resources.product.price'))
-                            ->required()
-                            ->mask(RawJs::make('$money($input, \',\')'))
-                            ->stripCharacters('.')
-                            ->numeric()
-                            ->prefix('Rp'),
-                        Forms\Components\Textarea::make('description')
-                            ->label(__('resources.product.description'))
-                            ->required(),
-                    ]),
-                Forms\Components\DateTimePicker::make('purchase_date')
+                Forms\Components\DatePicker::make('purchase_date')
                     ->label(__('resources.purchase.purchase_date'))
-                    ->required()
-                    ->default(now()),
-                Forms\Components\TextInput::make('quantity')
-                    ->label(__('resources.purchase.quantity'))
-                    ->required()
-                    ->mask(RawJs::make('$money($input, \',\')'))
-                    ->stripCharacters('.')
-                    ->numeric(),
-                Forms\Components\TextInput::make('price')
-                    ->label(__('resources.purchase.price'))
-                    ->required()
-                    ->mask(RawJs::make('$money($input, \',\')'))
-                    ->stripCharacters('.')
-                    ->numeric()
-                    ->prefix('Rp'),
+                    ->required(),
+                Forms\Components\Select::make('status')
+                    ->label(__('resources.purchase.status'))
+                    ->options(ProductStatus::class)
+                    ->enum(ProductStatus::class)
+                    ->default(ProductStatus::PENDING)
+                    ->required(),
             ]);
     }
 
@@ -103,39 +119,74 @@ class PurchaseResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('code')
+                    ->label(__('resources.purchase.code'))
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('number')
+                    ->label(__('resources.purchase.number'))
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('procurement.code')
+                    ->label(__('resources.purchase.procurement'))
+                    ->formatStateUsing(fn ($record) => $record->procurement->code.' - '.$record->procurement->number)
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('supplier.name')
                     ->label(__('resources.purchase.supplier'))
                     ->sortable(),
-                Tables\Columns\TextColumn::make('product.name')
-                    ->label(__('resources.purchase.product'))
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('purchase_date')
                     ->label(__('resources.purchase.purchase_date'))
-                    ->dateTime()
+                    ->date('d M Y')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('quantity')
-                    ->label(__('resources.purchase.quantity'))
-                    ->numeric()
+                Tables\Columns\TextColumn::make('status')
+                    ->label(__('resources.procurement.status'))
+                    ->badge()
+                    ->color(fn (ProductStatus $state): string => match ($state) {
+                        ProductStatus::CANCELED => 'danger',
+                        ProductStatus::PENDING => 'warning',
+                        ProductStatus::DONE => 'success',
+                    })
+                    ->formatStateUsing(fn (ProductStatus $state): string => $state->getLabel())
                     ->sortable(),
-                Tables\Columns\TextColumn::make('price')
-                    ->label(__('resources.purchase.price'))
-                    ->money('IDR')
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('status_at')
+                    ->label(__('resources.procurement.status_at'))
+                    ->dateTime('d M Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label(__('resources.purchase.created_at'))
-                    ->dateTime()
+                    ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label(__('resources.purchase.updated_at'))
-                    ->dateTime()
+                    ->dateTime('d M Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('deleted_at')
+                    ->label(__('resources.purchase.deleted_at'))
+                    ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('procurement')
+                    ->label(__('resources.purchase.procurement'))
+                    ->relationship('procurement', 'code')
+                    ->searchable()
+                    ->preload(),
+                Tables\Filters\SelectFilter::make('supplier')
+                    ->label(__('resources.purchase.supplier'))
+                    ->relationship('supplier', 'name')
+                    ->searchable()
+                    ->preload(),
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
+                Tables\Actions\Action::make('view_invoices')
+                    ->label(__('resources.purchase.view_invoices'))
+                    ->icon('heroicon-o-document-text')
+                    ->url(fn (Purchase $record): string => 
+                        InvoiceResource::getUrl('index', ['tableFilters[purchase][value]' => $record->id]))
+                    ->openUrlInNewTab(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
                 Tables\Actions\ForceDeleteAction::make(),
@@ -153,7 +204,8 @@ class PurchaseResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ProductsRelationManager::class,
+            InvoicesRelationManager::class,
         ];
     }
 
@@ -164,21 +216,6 @@ class PurchaseResource extends Resource
             'create' => Pages\CreatePurchase::route('/create'),
             'edit' => Pages\EditPurchase::route('/{record}/edit'),
         ];
-    }
-
-    public static function getModelLabel(): string 
-    {
-        return __('resources.purchase.label');
-    }
-
-    public static function getPluralModelLabel(): string
-    {
-        return __('resources.purchase.label');
-    }
-
-    public static function getBreadcrumb(): string
-    {
-        return __('resources.purchase.label');
     }
 
     public static function getEloquentQuery(): Builder

@@ -31,6 +31,12 @@ class PurchaseProduct extends Model
                 $model->status_at = now();
             }
         });
+
+        static::updating(function ($model) {
+            if ($model->isDirty('status')) {
+                $model->status_at = now();
+            }
+        });
     }
 
     public function purchase(): BelongsTo

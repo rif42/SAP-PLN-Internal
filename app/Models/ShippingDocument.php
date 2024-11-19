@@ -19,7 +19,6 @@ class ShippingDocument extends Model
         'number',
         'invoice_id',
         'supplier_id',
-        'procurement_id',
         'status',
         'status_at',
     ];
@@ -36,12 +35,18 @@ class ShippingDocument extends Model
                 $model->status_at = now();
             }
         });
+
+        static::updating(function ($model) {
+            if ($model->isDirty('status')) {
+                $model->status_at = now();
+            }
+        });
     }
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['code', 'number', 'invoice.code', 'supplier.name', 'procurement.code']);
+            ->logOnly(['code', 'number', 'invoice.code', 'supplier.name']);
     }
 
     public function invoice(): BelongsTo
@@ -52,11 +57,6 @@ class ShippingDocument extends Model
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
-    }
-
-    public function procurement(): BelongsTo
-    {
-        return $this->belongsTo(Procurement::class);
     }
 
     public function products(): HasMany

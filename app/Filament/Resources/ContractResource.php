@@ -20,7 +20,7 @@ class ContractResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-briefcase';
 
-    protected static ?string $navigationGroup = 'Purchasing';
+    protected static ?string $navigationGroup = 'Inventory';
 
     protected static ?int $navigationSort = 10;
 
@@ -105,7 +105,8 @@ class ContractResource extends Resource
                     ->color(fn (ContractStatus $state): string => match ($state) {
                         ContractStatus::Pending => 'warning',
                         ContractStatus::Active => 'success',
-                        ContractStatus::Inactive => 'danger',
+                        ContractStatus::Canceled => 'danger',
+                        ContractStatus::Done => 'info',
                     })
                     ->formatStateUsing(fn (ContractStatus $state): string => $state->getLabel())
                     ->sortable(),

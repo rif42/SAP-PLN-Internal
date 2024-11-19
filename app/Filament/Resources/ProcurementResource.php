@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\ProductStatus;
 use App\Filament\Resources\ProcurementResource\Pages;
 use App\Filament\Resources\ProcurementResource\RelationManagers\InvoicesRelationManager;
 use App\Filament\Resources\ProcurementResource\RelationManagers\ProductsRelationManager;
+use App\Filament\Resources\ProcurementResource\RelationManagers\PurchasesRelationManager;
 use App\Models\Procurement;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -97,6 +99,12 @@ class ProcurementResource extends Resource
                 Forms\Components\DatePicker::make('end_date')
                     ->label(__('resources.procurement.end_date'))
                     ->required(),
+                Forms\Components\Select::make('status')
+                    ->label(__('resources.procurement.status'))
+                    ->options(ProductStatus::class)
+                    ->enum(ProductStatus::class)
+                    ->default(ProductStatus::PENDING)
+                    ->required(),
             ]);
     }
 
@@ -116,37 +124,68 @@ class ProcurementResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('start_date')
                     ->label(__('resources.procurement.start_date'))
-                    ->date()
+                    ->date('d M Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('end_date')
                     ->label(__('resources.procurement.end_date'))
-                    ->date()
+                    ->date('d M Y')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label(__('resources.procurement.status'))
+                    ->badge()
+                    ->color(fn (ProductStatus $state): string => match ($state) {
+                        ProductStatus::CANCELED => 'danger',
+                        ProductStatus::PENDING => 'warning',
+                        ProductStatus::DONE => 'success',
+                    })
+                    ->formatStateUsing(fn (ProductStatus $state): string => $state->getLabel())
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('status_at')
+                    ->label(__('resources.procurement.status_at'))
+                    ->dateTime('d M Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label(__('resources.procurement.created_at'))
-                    ->dateTime()
+                    ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label(__('resources.procurement.updated_at'))
-                    ->dateTime()
+                    ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('deleted_at')
                     ->label(__('resources.procurement.deleted_at'))
-                    ->dateTime()
+                    ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('supplier')
+                    ->label(__('resources.procurement.supplier'))
+                    ->relationship('supplier', 'name')
+                    ->searchable()
+                    ->preload(),
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
+                Tables\Actions\Action::make('view_purchases')
+                    ->label(__('resources.procurement.view_purchases'))
+                    ->icon('heroicon-o-shopping-cart')
+                    ->url(fn (Procurement $record): string => 
+                        PurchaseResource::getUrl('index', ['tableFilters[procurement][value]' => $record->id]))
+                    ->openUrlInNewTab(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ForceDeleteAction::make(),
+                Tables\Actions\RestoreAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
                 ]),
             ]);
     }
@@ -155,7 +194,7 @@ class ProcurementResource extends Resource
     {
         return [
             ProductsRelationManager::class,
-            InvoicesRelationManager::class,
+            PurchasesRelationManager::class,
         ];
     }
 

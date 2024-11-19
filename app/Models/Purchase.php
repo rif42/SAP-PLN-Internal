@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ProductStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -14,11 +15,10 @@ class Purchase extends Model
     use LogsActivity, SoftDeletes;
 
     protected $fillable = [
+        'code',
+        'number',
         'supplier_id',
-        'product_id',
         'purchase_date',
-        'quantity',
-        'price',
         'procurement_id',
         'status',
         'status_at',
@@ -42,7 +42,7 @@ class Purchase extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['supplier.name', 'product.name', 'purchase_date', 'quantity', 'price', 'procurement.name'])
+            ->logOnly(['supplier.name', 'purchase_date', 'procurement.name'])
             ->logOnlyDirty();
     }
 
@@ -51,13 +51,18 @@ class Purchase extends Model
         return $this->belongsTo(Supplier::class);
     }
 
-    public function product(): BelongsTo
-    {
-        return $this->belongsTo(Product::class);
-    }
-
     public function procurement(): BelongsTo
     {
         return $this->belongsTo(Procurement::class);
+    }
+
+    public function products(): HasMany
+    {
+        return $this->hasMany(PurchaseProduct::class);
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
     }
 }

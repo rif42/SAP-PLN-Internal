@@ -38,6 +38,12 @@ class Procurement extends Model
                 $model->status_at = now();
             }
         });
+
+        static::updating(function ($model) {
+            if ($model->isDirty('status')) {
+                $model->status_at = now();
+            }
+        });
     }
 
     public function getActivitylogOptions(): LogOptions
@@ -57,8 +63,8 @@ class Procurement extends Model
         return $this->hasMany(ProcurementProduct::class);
     }
 
-    public function invoices(): HasMany
+    public function purchases(): HasMany
     {
-        return $this->hasMany(Invoice::class);
+        return $this->hasMany(Purchase::class);
     }
 }
