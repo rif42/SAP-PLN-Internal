@@ -134,6 +134,12 @@ return [
         'causer_type' => 'Penyebab Tipe',
         'created_at' => 'Dibuat Pada',
     ],
+    'product_stock_recap' => [
+        'label' => 'Rekap Stok Barang',
+        'date' => 'Tanggal',
+        'product' => 'Barang',
+        'quantity' => 'Jumlah',
+    ],
     'product_stock_adjustment' => [
         'label' => 'Perubahan Stok',
         'product' => 'Barang',
