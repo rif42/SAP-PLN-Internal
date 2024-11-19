@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Enums\ContractStatus;
 use App\Filament\Resources\ContractResource\Pages;
+use App\Filament\Resources\ContractResource\RelationManagers\ProductsRelationManager;
 use App\Models\Contract;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -142,7 +143,7 @@ class ContractResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ProductsRelationManager::class,
         ];
     }
 

@@ -45,11 +45,6 @@ class Product extends Model
         return $this->hasMany(PurchaseProduct::class);
     }
 
-    public function contractItems(): HasMany
-    {
-        return $this->hasMany(ContractItem::class);
-    }
-
     public function procurementProducts(): HasMany
     {
         return $this->hasMany(ProcurementProduct::class);

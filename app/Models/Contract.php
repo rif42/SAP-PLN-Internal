@@ -57,8 +57,8 @@ class Contract extends Model
         return $this->belongsTo(Supplier::class);
     }
 
-    public function items(): HasMany
+    public function products(): HasMany
     {
-        return $this->hasMany(ContractItem::class);
+        return $this->hasMany(ContractProduct::class);
     }
 }

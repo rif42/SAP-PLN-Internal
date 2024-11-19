@@ -28,12 +28,15 @@ return [
         'created_at' => 'Dibuat Pada',
         'updated_at' => 'Diperbarui Pada',
     ],
-    'contract_item' => [
-        'label' => 'Item Pekerjaan',
-        'contract' => 'Pekerjaan',
+    'contract_product' => [
+        'label' => 'Barang Pekerjaan',
         'product' => 'Barang',
+        'price' => 'Harga',
         'quantity' => 'Jumlah',
-        'unit_price' => 'Harga Satuan',
+        'status' => 'Status',
+        'status_at' => 'Status Pada',
+        'created_at' => 'Dibuat Pada',
+        'updated_at' => 'Diperbarui Pada',
     ],
     'invoice' => [
         'label' => 'Faktur',

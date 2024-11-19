@@ -34,6 +34,11 @@ class ProductStockAdjustmentResource extends Resource
         return __('resources.product_stock_adjustment.label');
     }
 
+    public static function getNavigationLabel(): string
+    {
+        return __('resources.product_stock_adjustment.label');
+    }
+
     public static function form(Form $form): Form
     {
         return $form
