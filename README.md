@@ -6,6 +6,31 @@
 - Composer
 - SQLite
 
+### PHP dan Composer
+jika anda sudah punya php dan composer, skip langkah ini
+- jalankan powershell atau terminal menggunakan admin permission
+- jalankan perintah ini di terminal
+  ```bash
+  Set-ExecutionPolicy Bypass -Scope Process
+  ```
+
+- jalankan perintah ini untuk menginstall chocolatey - [referensi](https://chocolatey.org/install#individual)
+  ```bash
+  Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+  ```
+  
+- masih di terminal yang sama, jalankan untuk menginstall php
+  ```bash
+  choco install php
+  ```
+  
+- jalankan untuk menginstall composer
+  ```bash
+  choco install composer
+  ```
+  
+- jika instalasi sudah selesai, restart komputer
+
 ## 🔧 Installation
 
 1. Clone the repository:
