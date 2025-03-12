@@ -8,6 +8,7 @@
 
 ### PHP dan Composer
 jika anda sudah punya php dan composer, skip langkah ini
+jika belum punya, ikuti langkah dibawah:
 - jalankan powershell atau terminal menggunakan admin permission
 - jalankan perintah ini di terminal
   ```bash
@@ -30,6 +31,19 @@ jika anda sudah punya php dan composer, skip langkah ini
   ```
   
 - jika instalasi sudah selesai, restart komputer
+
+### SQLite
+jika anda sudah punya sqlite, skip langkah ini
+jika belum punya, ikuti langkah dibawah:
+- download file binary / exe dari [link ini ]([url](https://www.sqlite.org/download.html))
+- download `sqlite-shell-win32.zip` dan `sqlite-dll-win32.zip` file
+- buat sebuah folder di `C:\sqlite` dan unzip kedua zip diatas ke dalam folder
+- tekan windows button dan masukkan `environment variables` di kolom search
+- pilih `edit the systme environment variables`
+- di dalam window pop up, klik `Environment Variables`
+- di user variables, cari variable `Path`, lalu double click
+- klik `New` dan paste `C:\sqlite` lalu klik ok
+- restart komputer
 
 ## 🔧 Installation
 
