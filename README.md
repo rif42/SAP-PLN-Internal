@@ -35,7 +35,7 @@ jika belum punya, ikuti langkah dibawah:
 ### SQLite
 jika anda sudah punya sqlite, skip langkah ini
 jika belum punya, ikuti langkah dibawah:
-- download file binary / exe dari link ini - https://www.sqlite.org/download.html
+- download file `Precompiled Binaries for Windows` dari link ini - https://www.sqlite.org/download.html
 - download `sqlite-shell-win32.zip` dan `sqlite-dll-win32.zip` file
 - buat sebuah folder di `C:\sqlite` dan unzip kedua zip diatas ke dalam folder
 - tekan windows button dan masukkan `environment variables` di kolom search
