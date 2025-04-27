@@ -17,7 +17,7 @@ class Procurement extends Model
     protected $fillable = [
         'code',
         'number',
-        'supplier_id',
+        'contract_id',
         'start_date',
         'end_date',
         'status',
@@ -49,13 +49,13 @@ class Procurement extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['code', 'number', 'supplier.name', 'start_date', 'end_date'])
+            ->logOnly(['code', 'number', 'contract.name', 'start_date', 'end_date'])
             ->logOnlyDirty();
     }
 
-    public function supplier(): BelongsTo
+    public function contract(): BelongsTo
     {
-        return $this->belongsTo(Supplier::class);
+        return $this->belongsTo(Contract::class);
     }
 
     public function products(): HasMany

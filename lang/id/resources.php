@@ -75,7 +75,7 @@ return [
         'label' => 'Pengadaan',
         'code' => 'Kode',
         'number' => 'Nomor',
-        'supplier' => 'Pemasok',
+        'contract' => 'Pekerjaan',
         'start_date' => 'Tanggal Mulai',
         'end_date' => 'Tanggal Berakhir',
         'status' => 'Status',

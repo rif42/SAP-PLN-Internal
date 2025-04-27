@@ -75,7 +75,7 @@ return [
         'label' => 'Procurements',
         'code' => 'Code',
         'number' => 'Number',
-        'supplier' => 'Supplier',
+        'contract' => 'Pekerjaan',
         'start_date' => 'Start Date',
         'end_date' => 'End Date',
         'status' => 'Status',
