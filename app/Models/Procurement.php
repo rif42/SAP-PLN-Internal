@@ -20,6 +20,7 @@ class Procurement extends Model
         'amp_id',
         'penugasan_id',
         'kategori',
+        'nilai_penugasan',
         'start_date',
         'end_date',
         'status',

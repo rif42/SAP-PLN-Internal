@@ -70,6 +70,10 @@ class ProcurementResource extends Resource
                 Forms\Components\TextInput::make('kategori')
                     ->label(__('resources.procurement.kategori'))
                     ->required(),
+                Forms\Components\TextInput::make('nilai_penugasan')
+                    ->label(__('resources.procurement.nilai_penugasan'))
+                    ->required()
+                    ->numeric(),
                 Forms\Components\DatePicker::make('start_date')
                     ->label(__('resources.procurement.start_date'))
                     ->required(),
@@ -105,6 +109,10 @@ class ProcurementResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('kategori')
                     ->label(__('resources.procurement.kategori'))
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('nilai_penugasan')
+                    ->label(__('resources.procurement.nilai_penugasan'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('start_date')
