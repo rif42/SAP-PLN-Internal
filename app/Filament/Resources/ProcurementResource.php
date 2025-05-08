@@ -60,30 +60,16 @@ class ProcurementResource extends Resource
                     ->label(__('resources.procurement.number'))
                     ->required()
                     ->unique(ignoreRecord: true),
-                Forms\Components\Select::make('contract_id')
-                    ->label(__('resources.procurement.contract'))
-                    ->relationship(
-                        name: 'contract',
-                        modifyQueryUsing: fn (Builder $query) => $query
-                            ->join('suppliers', 'contracts.supplier_id', '=', 'suppliers.id')
-                            ->select(
-                                'contracts.id', 
-                                'suppliers.name as supplier_name', 
-                                'contracts.start_date', 
-                                'contracts.end_date'
-                            )
-                    )
-                    ->getOptionLabelFromRecordUsing(function (Model $record) {
-                        $startDate = Carbon::parse($record->start_date)->format('d M Y');
-                        $endDate = Carbon::parse($record->end_date)->format('d M Y');
-                        
-                        return "{$record->supplier_name} ({$startDate} - {$endDate})";
-                    })
+                Forms\Components\TextInput::make('amp_id')
+                    ->label(__('resources.procurement.amp_id'))
                     ->required()
-                    ->searchable(
-                        ['supplier_name', 'contracts.start_date', 'contracts.end_date', 'contracts.total_amount']
-                    ) 
-                    ->live(),
+                    ->numeric(),
+                Forms\Components\TextInput::make('penugasan_id')
+                    ->label(__('resources.procurement.penugasan_id'))
+                    ->required(),
+                Forms\Components\TextInput::make('kategori')
+                    ->label(__('resources.procurement.kategori'))
+                    ->required(),
                 Forms\Components\DatePicker::make('start_date')
                     ->label(__('resources.procurement.start_date'))
                     ->required(),
@@ -109,19 +95,17 @@ class ProcurementResource extends Resource
                 Tables\Columns\TextColumn::make('number')
                     ->label(__('resources.procurement.number'))
                     ->searchable(),
-                Tables\Columns\TextColumn::make('contract.id')
-                    ->label(__('resources.procurement.contract'))
-                    ->formatStateUsing(function ($state, Procurement $record) {
-                        $contract = $record->contract; // Access the related contract model
-                        if (!$contract) {
-                            return '-';
-                        }
-                        $supplierName = $contract->supplier?->name ?? 'N/A';
-                        $startDate = $contract->start_date?->format('d M Y') ?? 'N/A';
-                        $endDate = $contract->end_date?->format('d M Y') ?? 'N/A';
-
-                        return "{$supplierName} ({$startDate} - {$endDate})";
-                    })
+                Tables\Columns\TextColumn::make('amp_id')
+                    ->label(__('resources.procurement.amp_id'))
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('penugasan_id')
+                    ->label(__('resources.procurement.penugasan_id'))
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('kategori')
+                    ->label(__('resources.procurement.kategori'))
+                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('start_date')
                     ->label(__('resources.procurement.start_date'))
@@ -163,18 +147,13 @@ class ProcurementResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('supplier')
-                    ->label(__('resources.procurement.supplier'))
-                    ->relationship('contract.supplier', 'name')
-                    ->searchable()
-                    ->preload(),
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
                 Tables\Actions\Action::make('view_purchases')
                     ->label(__('resources.procurement.view_purchases'))
                     ->icon('heroicon-o-shopping-cart')
-                    ->url(fn (Procurement $record): string => 
+                    ->url(fn (Procurement $record): string =>
                         PurchaseResource::getUrl('index', ['tableFilters[procurement][value]' => $record->id]))
                     ->openUrlInNewTab(),
                 Tables\Actions\EditAction::make(),
@@ -208,3 +187,7 @@ class ProcurementResource extends Resource
         ];
     }
 }
+
+
+
+

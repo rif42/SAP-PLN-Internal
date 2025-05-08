@@ -74,8 +74,10 @@ return [
     'procurement' => [
         'label' => 'Pengadaan',
         'code' => 'Kode',
-        'number' => 'Nomor',
-        'contract' => 'Pekerjaan',
+        'number' => 'Nomor WO',
+        'amp_id' => 'AMP ID',
+        'penugasan_id' => 'Nama Penugasan',
+        'kategori' => 'Category',
         'start_date' => 'Tanggal Mulai',
         'end_date' => 'Tanggal Berakhir',
         'status' => 'Status',

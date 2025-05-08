@@ -17,7 +17,9 @@ class Procurement extends Model
     protected $fillable = [
         'code',
         'number',
-        'contract_id',
+        'amp_id',
+        'penugasan_id',
+        'kategori',
         'start_date',
         'end_date',
         'status',
@@ -68,3 +70,4 @@ class Procurement extends Model
         return $this->hasMany(Purchase::class);
     }
 }
+
