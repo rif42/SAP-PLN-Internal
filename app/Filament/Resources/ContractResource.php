@@ -130,7 +130,6 @@ class ContractResource extends Resource
                         ContractStatus::Active => 'success',
                         ContractStatus::Canceled => 'danger',
                         ContractStatus::Done => 'info',
-                        ContractStatus::Deal => 'primary',
                     })
                     ->formatStateUsing(fn (ContractStatus $state): string => $state->getLabel())
                     ->sortable(),
@@ -192,5 +191,3 @@ class ContractResource extends Resource
             ]);
     }
 }
-
-

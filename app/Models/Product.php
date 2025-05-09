@@ -19,14 +19,13 @@ class Product extends Model
         'category_id',
         'barcode',
         'description',
-        'price',
         'stock',
     ];
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'category.name', 'barcode', 'description', 'price', 'stock'])
+            ->logOnly(['name', 'category.name', 'barcode', 'description', 'stock'])
             ->logOnlyDirty();
     }
 
@@ -85,3 +84,4 @@ class Product extends Model
         return $this->hasMany(ContractProduct::class);
     }
 }
+

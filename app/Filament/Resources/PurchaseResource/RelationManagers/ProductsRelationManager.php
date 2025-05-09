@@ -47,7 +47,7 @@ class ProductsRelationManager extends RelationManager
                         })->map(function ($items) use ($purchase) {
                             // Get the product label
                             $label = $items->first()['label'];
-                            
+
                             // Calculate quantities
                             $totalQuantity = $items->sum('quantity');
                             $usedQuantity = $purchase->products()
@@ -70,7 +70,7 @@ class ProductsRelationManager extends RelationManager
                         function (Get $get, ?PurchaseProduct $record = null) {
                             return function (string $attribute, $value, \Closure $fail) use ($record) {
                                 $purchase = $this->getOwnerRecord();
-                                
+
                                 // Get total quantity from procurement
                                 $procurementProductQuantity = $purchase->procurement->products()
                                     ->where('product_id', $value)
@@ -100,7 +100,7 @@ class ProductsRelationManager extends RelationManager
                         }
 
                         $purchase = $this->getOwnerRecord();
-                        
+
                         // Get procurement product details
                         $procurementProduct = $purchase->procurement->products()
                             ->where('product_id', $state)
@@ -109,9 +109,6 @@ class ProductsRelationManager extends RelationManager
                         if (!$procurementProduct) {
                             return;
                         }
-                        
-                        // Set price from procurement
-                        $set('price', number_format($procurementProduct->price, 0, ',', '.'));
 
                         // Calculate remaining quantity
                         $procurementProductQuantity = $purchase->procurement->products()
@@ -127,13 +124,7 @@ class ProductsRelationManager extends RelationManager
                         // Set initial quantity to remaining stock
                         $set('quantity', max(0, $remainingQuantity));
                     }),
-                Forms\Components\TextInput::make('price')
-                    ->label(__('resources.purchase_product.price'))
-                    ->required()
-                    ->mask(RawJs::make('$money($input, \',\')'))
-                    ->stripCharacters('.')
-                    ->numeric()
-                    ->prefix('Rp'),
+
                 Forms\Components\TextInput::make('quantity')
                     ->label(__('resources.purchase_product.quantity'))
                     ->required()
@@ -162,7 +153,7 @@ class ProductsRelationManager extends RelationManager
 
                                 // Calculate how many items are still available
                                 $availableQuantity = $procurementQuantity - $quantityInUse;
-                                
+
                                 // Check if requested quantity exceeds available amount
                                 $quantityAfterRequest = $availableQuantity - $value;
                                 if ($quantityAfterRequest < 0) {
@@ -188,11 +179,6 @@ class ProductsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('product.name')
                     ->label(__('resources.purchase_product.product'))
                     ->formatStateUsing(fn ($record) => $record->product->code.' - '.$record->product->name)
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('price')
-                    ->label(__('resources.purchase_product.price'))
-                    ->money('IDR')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('quantity')
