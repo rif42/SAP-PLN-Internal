@@ -148,6 +148,16 @@ class PurchaseResource extends Resource
                 Tables\Columns\TextColumn::make('code')
                     ->label(__('resources.purchase.code'))
                     ->searchable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label(__('resources.procurement.status'))
+                    ->badge()
+                    ->color(fn (ProductStatus $state): string => match ($state) {
+                        ProductStatus::CANCELED => 'danger',
+                        ProductStatus::PENDING => 'warning',
+                        ProductStatus::DONE => 'success',
+                    })
+                    ->formatStateUsing(fn (ProductStatus $state): string => $state->getLabel())
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('number')
                     ->label(__('resources.purchase.number'))
                     ->formatStateUsing(fn ($record) => $record->procurement?->number)
@@ -163,16 +173,7 @@ class PurchaseResource extends Resource
                     ->label(__('resources.purchase.purchase_date'))
                     ->date('d M Y')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('status')
-                    ->label(__('resources.procurement.status'))
-                    ->badge()
-                    ->color(fn (ProductStatus $state): string => match ($state) {
-                        ProductStatus::CANCELED => 'danger',
-                        ProductStatus::PENDING => 'warning',
-                        ProductStatus::DONE => 'success',
-                    })
-                    ->formatStateUsing(fn (ProductStatus $state): string => $state->getLabel())
-                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('status_at')
                     ->label(__('resources.procurement.status_at'))
                     ->dateTime('d M Y H:i')

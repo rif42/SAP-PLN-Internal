@@ -190,6 +190,18 @@ class ShippingDocumentResource extends Resource
                 Tables\Columns\TextColumn::make('code')
                     ->label(__('resources.shipping_document.code'))
                     ->searchable(),
+
+                Tables\Columns\TextColumn::make('status')
+                    ->label(__('resources.shipping_document.status'))
+                    ->badge()
+                    ->color(fn (ProductStatus $state): string => match ($state) {
+                        ProductStatus::CANCELED => 'danger',
+                        ProductStatus::PENDING => 'warning',
+                        ProductStatus::DONE => 'success',
+                    })
+                    ->formatStateUsing(fn (ProductStatus $state): string => $state->getLabel())
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('number')
                     ->label(__('resources.shipping_document.number'))
                     ->formatStateUsing(function ($record) {
@@ -207,16 +219,7 @@ class ShippingDocumentResource extends Resource
                     ->label(__('resources.shipping_document.supplier'))
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('status')
-                    ->label(__('resources.shipping_document.status'))
-                    ->badge()
-                    ->color(fn (ProductStatus $state): string => match ($state) {
-                        ProductStatus::CANCELED => 'danger',
-                        ProductStatus::PENDING => 'warning',
-                        ProductStatus::DONE => 'success',
-                    })
-                    ->formatStateUsing(fn (ProductStatus $state): string => $state->getLabel())
-                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('status_at')
                     ->label(__('resources.shipping_document.status_at'))
                     ->dateTime('d M Y H:i')

@@ -44,6 +44,44 @@ class ContractResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\Select::make('procurement_id')
+                    ->label(__('resources.contract.number'))
+                    ->options(function () {
+                        return \App\Models\Procurement::pluck('number', 'id');
+                    })
+                    ->searchable()
+                    ->live()
+                    ->afterStateUpdated(function ($state, \Filament\Forms\Set $set) {
+                        if (!$state) return;
+
+                        // Find the procurement
+                        $procurement = \App\Models\Procurement::find($state);
+                        if ($procurement) {
+                            // Set the penugasan_id for display
+                            $set('penugasan_id', $procurement->penugasan_id);
+
+                            // Also set supplier from the procurement if it exists
+                            if ($procurement->supplier_id) {
+                                $set('supplier_id', $procurement->supplier_id);
+                            }
+                        } else {
+                            // Clear fields if no procurement found
+                            $set('penugasan_id', null);
+                            $set('supplier_id', null);
+                        }
+                    })
+                    ->afterStateHydrated(function ($state, $record, \Filament\Forms\Set $set) {
+                        // When loading an existing record, set the penugasan_id field
+                        if ($record && $record->procurement) {
+                            $set('penugasan_id', $record->procurement->penugasan_id);
+                        }
+                    }),
+
+                Forms\Components\TextInput::make('penugasan_id')
+                    ->label(__('resources.contract.penugasan_id'))
+                    ->disabled()
+                    ->dehydrated(false),
+
                 Forms\Components\Select::make('supplier_id')
                     ->label(__('resources.procurement.supplier'))
                     ->relationship('supplier', 'name')
@@ -106,9 +144,45 @@ class ContractResource extends Resource
     {
         return $table
             ->columns([
+                 Tables\Columns\TextColumn::make('status')
+                    ->label(__('resources.contract.status'))
+                    ->badge()
+                    ->color(fn (ContractStatus $state): string => match ($state) {
+                        ContractStatus::Pending => 'warning',
+                        ContractStatus::Active => 'success',
+                        ContractStatus::Canceled => 'danger',
+                        ContractStatus::Done => 'info',
+                        ContractStatus::Deal => 'primary',
+                    })
+                    ->formatStateUsing(fn (ContractStatus $state): string => $state->getLabel())
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('procurement.number')
+                    ->label(__('resources.contract.number'))
+                    ->formatStateUsing(function ($record) {
+                        return $record->procurement?->number ?? 'N/A';
+                    })
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->whereHas('procurement', function ($query) use ($search) {
+                            $query->where('number', 'like', "%{$search}%");
+                        });
+                    })
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('procurement.penugasan_id')
+                    ->label(__('resources.contract.penugasan_id'))
+                    ->formatStateUsing(function ($record) {
+                        return $record->procurement?->penugasan_id ?? 'N/A';
+                    })
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->whereHas('procurement', function ($query) use ($search) {
+                            $query->where('penugasan_id', 'like', "%{$search}%");
+                        });
+                    })
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('supplier.name')
                     ->label(__('resources.contract.supplier'))
-                    ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('start_date')
                     ->label(__('resources.contract.start_date'))
@@ -122,17 +196,8 @@ class ContractResource extends Resource
                     ->label(__('resources.contract.total_amount'))
                     ->money('IDR')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('status')
-                    ->label(__('resources.contract.status'))
-                    ->badge()
-                    ->color(fn (ContractStatus $state): string => match ($state) {
-                        ContractStatus::Pending => 'warning',
-                        ContractStatus::Active => 'success',
-                        ContractStatus::Canceled => 'danger',
-                        ContractStatus::Done => 'info',
-                    })
-                    ->formatStateUsing(fn (ContractStatus $state): string => $state->getLabel())
-                    ->sortable(),
+
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->label(__('resources.contract.created_at'))
                     ->dateTime()
@@ -191,3 +256,8 @@ class ContractResource extends Resource
             ]);
     }
 }
+
+
+
+
+

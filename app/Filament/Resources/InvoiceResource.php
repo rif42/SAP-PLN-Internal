@@ -160,6 +160,16 @@ class InvoiceResource extends Resource
                 Tables\Columns\TextColumn::make('code')
                     ->label(__('resources.invoice.code'))
                     ->searchable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label(__('resources.invoice.status'))
+                    ->badge()
+                    ->color(fn (ProductStatus $state): string => match ($state) {
+                        ProductStatus::CANCELED => 'danger',
+                        ProductStatus::PENDING => 'warning',
+                        ProductStatus::DONE => 'success',
+                    })
+                    ->formatStateUsing(fn (ProductStatus $state): string => $state->getLabel())
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('number')
                     ->label(__('resources.invoice.number'))
                     ->formatStateUsing(function ($record) {
@@ -179,16 +189,7 @@ class InvoiceResource extends Resource
                     ->label(__('resources.invoice.supplier'))
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('status')
-                    ->label(__('resources.invoice.status'))
-                    ->badge()
-                    ->color(fn (ProductStatus $state): string => match ($state) {
-                        ProductStatus::CANCELED => 'danger',
-                        ProductStatus::PENDING => 'warning',
-                        ProductStatus::DONE => 'success',
-                    })
-                    ->formatStateUsing(fn (ProductStatus $state): string => $state->getLabel())
-                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('status_at')
                     ->label(__('resources.invoice.status_at'))
                     ->dateTime('d M Y H:i')

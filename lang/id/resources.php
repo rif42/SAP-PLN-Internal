@@ -19,6 +19,9 @@ return [
         ],
     ],
     'contract' => [
+        'number' => 'Nomor',
+        'penugasan_id' => 'Nama Penugasan',
+        'supplier' => 'pemasok',
         'label' => 'Pekerjaan',
         'supplier_id' => 'Pemasok',
         'start_date' => 'Tanggal Mulai',
