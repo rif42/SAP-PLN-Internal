@@ -196,6 +196,11 @@ class ProcurementResource extends Resource
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
+                Tables\Filters\SelectFilter::make('contract')
+                    ->label(__('resources.procurement.contract'))
+                    ->relationship('contract', 'id')
+                    ->getOptionLabelFromRecordUsing(fn (Contract $record) => "Contract #{$record->id}")
+                    ->searchable(),
             ])
             ->actions([
                 Tables\Actions\Action::make('view_purchases')
@@ -235,6 +240,7 @@ class ProcurementResource extends Resource
         ];
     }
 }
+
 
 
 

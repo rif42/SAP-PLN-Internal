@@ -213,11 +213,20 @@ class ContractResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
+                Tables\Actions\Action::make('view_procurement')
+                    ->label(__('resources.contract.view_procurement'))
+                    ->icon('heroicon-o-document-text')
+                    ->url(fn (Contract $record): string =>
+                        route('filament.admin.resources.procurements.index', [
+                            'tableFilters[contract][value]' => $record->id
+                        ]))
+                    ->openUrlInNewTab(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
                 Tables\Actions\ForceDeleteAction::make(),
                 Tables\Actions\RestoreAction::make(),
             ])
+
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
@@ -256,6 +265,7 @@ class ContractResource extends Resource
             ]);
     }
 }
+
 
 
 

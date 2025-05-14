@@ -57,9 +57,9 @@ class Procurement extends Model
             ->logOnlyDirty();
     }
 
-    public function contract(): BelongsTo
+    public function contract()
     {
-        return $this->belongsTo(Contract::class);
+        return $this->hasOne(Contract::class);
     }
 
     public function products(): HasMany
@@ -72,5 +72,6 @@ class Procurement extends Model
         return $this->hasMany(Purchase::class);
     }
 }
+
 
 

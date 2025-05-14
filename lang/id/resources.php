@@ -30,6 +30,7 @@ return [
         'status' => 'Status',
         'created_at' => 'Dibuat Pada',
         'updated_at' => 'Diperbarui Pada',
+        'view_procurement' => 'Lihat Pengadaan',
     ],
     'contract_product' => [
         'label' => 'Barang Pekerjaan',
@@ -92,6 +93,7 @@ return [
         'updated_at' => 'Diperbarui Pada',
         'deleted_at' => 'Dihapus Pada',
         'view_purchases' => 'Lihat Pembelian',
+        'contract' => 'Pekerjaan',
     ],
     'procurement_product' => [
         'label' => 'Barang Pengadaan',
