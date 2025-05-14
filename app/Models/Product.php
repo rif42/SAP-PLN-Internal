@@ -83,5 +83,18 @@ class Product extends Model
     {
         return $this->hasMany(ContractProduct::class);
     }
+
+    protected static function booted()
+    {
+        static::created(function ($product) {
+            // Buat rekap stok untuk hari ini saat produk baru dibuat
+            \App\Models\ProductStockRecap::create([
+                'date' => \Carbon\Carbon::today()->format('Y-m-d'),
+                'product_id' => $product->id,
+                'quantity' => $product->stock ?? 0,
+            ]);
+        });
+    }
 }
+
 
