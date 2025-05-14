@@ -13,6 +13,9 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Illuminate\Support\Facades\Storage;
+
 
 class ShippingDocumentResource extends Resource
 {
@@ -48,6 +51,31 @@ class ShippingDocumentResource extends Resource
     {
         return $form
             ->schema([
+                  Forms\Components\Section::make(__('resources.procurement.documents'))
+                    ->schema([
+                        Forms\Components\FileUpload::make('suratJalan_document')
+                            ->label(__('Input File Surat Jalan'))
+                            ->helperText('Upload dokumen Surat Jalan dalam format PDF')
+                            ->acceptedFileTypes(['application/pdf'])
+                            ->disk('public') // Explicitly set the disk to public
+                            ->directory('procurement-suratJalan-documents')
+                            ->maxSize(10240) // 10MB
+                            ->downloadable()
+                            ->openable()
+                            ->previewable(true)
+                            // Custom file naming based on procurement code
+                            ->getUploadedFileNameForStorageUsing(
+                                function (TemporaryUploadedFile $file, callable $get) {
+                                    $code = $get('code');
+                                    return "Surat-Jalan_{$code}.pdf";
+                                }
+                            )
+                            ->visibility('public')
+                            ->columnSpanFull(),
+
+                        // Existing document fields...
+                    ]),
+
                 Forms\Components\TextInput::make('code')
                     ->label(__('resources.shipping_document.code'))
                     ->required()
@@ -165,6 +193,20 @@ class ShippingDocumentResource extends Resource
                     ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('suratJalan_document')
+                    ->label('File Surat Jalan')
+                    ->formatStateUsing(function ($state, $record) {
+                        if (empty($state)) {
+                            return '-';
+                        }
+
+                        return "Surat-Jalan_{$record->code}.pdf";
+                    })
+                    ->icon('heroicon-o-document-text')
+                    ->color('success')
+                    ->url(fn ($record) => $record->suratJalan_document ? Storage::disk('public')->url($record->suratJalan_document) : null)
+                    ->openUrlInNewTab()
+                    ->searchable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('invoice')

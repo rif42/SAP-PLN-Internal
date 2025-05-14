@@ -73,51 +73,47 @@ class ProcurementResource extends Resource
                             )
                             ->visibility('public')
                             ->columnSpanFull(),
-
-                        // Existing document fields...
                     ]),
 
-                Forms\Components\Section::make(__('resources.procurement.basic_info'))
-                    ->schema([
-                        Forms\Components\TextInput::make('code')
+                    Forms\Components\TextInput::make('code')
                             ->label(__('resources.procurement.code'))
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->default(fn () => 'PRC-'.str_pad((Procurement::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT))
                             ->readOnly(),
-                        Forms\Components\TextInput::make('number')
+                    Forms\Components\TextInput::make('number')
                             ->label(__('resources.procurement.number'))
                             ->required()
                             ->unique(ignoreRecord: true),
-                        Forms\Components\TextInput::make('amp_id')
+                    Forms\Components\TextInput::make('amp_id')
                             ->label(__('resources.procurement.amp_id'))
                             ->required()
                             ->numeric(),
-                        Forms\Components\TextInput::make('penugasan_id')
+                    Forms\Components\TextInput::make('penugasan_id')
                             ->label(__('resources.procurement.penugasan_id'))
                             ->required(),
-                        Forms\Components\TextInput::make('kategori')
+                    Forms\Components\TextInput::make('kategori')
                             ->label(__('resources.procurement.kategori'))
                             ->required(),
-                        Forms\Components\TextInput::make('nilai_penugasan')
+                    Forms\Components\TextInput::make('nilai_penugasan')
                             ->label(__('resources.procurement.nilai_penugasan'))
                             ->required()
                             ->numeric(),
-                        Forms\Components\DatePicker::make('start_date')
+                    Forms\Components\DatePicker::make('start_date')
                             ->label(__('resources.procurement.start_date'))
                             ->required(),
-                        Forms\Components\DatePicker::make('end_date')
+                    Forms\Components\DatePicker::make('end_date')
                             ->label(__('resources.procurement.end_date'))
                             ->required(),
-                        Forms\Components\Select::make('status')
+                    Forms\Components\Select::make('status')
                             ->label(__('resources.procurement.status'))
                             ->options(ProductStatus::class)
                             ->enum(ProductStatus::class)
                             ->default(ProductStatus::PENDING)
                             ->required(),
-                    ]),
-            ]);
+                ]);
     }
+
 
     public static function table(Table $table): Table
     {
