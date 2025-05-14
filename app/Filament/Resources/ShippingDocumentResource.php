@@ -51,7 +51,7 @@ class ShippingDocumentResource extends Resource
     {
         return $form
             ->schema([
-                  Forms\Components\Section::make(__('resources.procurement.documents'))
+                Forms\Components\Section::make(__('resources.procurement.documents'))
                     ->schema([
                         Forms\Components\FileUpload::make('suratJalan_document')
                             ->label(__('Input File Surat Jalan'))
@@ -72,8 +72,6 @@ class ShippingDocumentResource extends Resource
                             )
                             ->visibility('public')
                             ->columnSpanFull(),
-
-                        // Existing document fields...
                     ]),
 
                 Forms\Components\TextInput::make('code')
@@ -82,24 +80,63 @@ class ShippingDocumentResource extends Resource
                     ->unique(ignoreRecord: true)
                     ->default(fn () => 'SHP-'.str_pad((ShippingDocument::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT))
                     ->readOnly(),
-                Forms\Components\TextInput::make('number')
+
+                // Updated Select for procurement numbers
+                Forms\Components\Select::make('number')
                     ->label(__('resources.shipping_document.number'))
-                    ->required()
-                    ->unique(ignoreRecord: true),
-                Forms\Components\Select::make('invoice_id')
-                    ->label(__('resources.shipping_document.invoice'))
-                    ->relationship('invoice', 'code', fn (Builder $query) => $query->selectRaw("id, code || ' - ' || number as code"))
-                    ->required()
+                    ->options(function () {
+                        return \App\Models\Procurement::pluck('number', 'id');
+                    })
                     ->searchable()
                     ->live()
-                    ->afterStateUpdated(function ($state, Forms\Set $set) {
-                        if ($state) {
-                            $invoice = \App\Models\Invoice::find($state);
-                            if ($invoice) {
-                                $set('supplier_id', $invoice->supplier_id);
+                    ->afterStateUpdated(function ($state, \Filament\Forms\Set $set) {
+                        if (!$state) return;
+
+                        // Find invoice related to this procurement
+                        $invoice = \App\Models\Invoice::where('purchase_id', function ($query) use ($state) {
+                            $query->select('id')
+                                ->from('purchases')
+                                ->where('number', $state);
+                        })->first();
+
+                        if ($invoice) {
+                            // Set the invoice_id for database storage
+                            $set('invoice_id', $invoice->id);
+
+                            // Set the invoice_code for display
+                            $set('invoice_code', $invoice->code);
+
+                            // Also set supplier from the invoice
+                            $set('supplier_id', $invoice->supplier_id);
+                        } else {
+                            // Clear fields if no invoice found
+                            $set('invoice_id', null);
+                            $set('invoice_code', null);
+                            $set('supplier_id', null);
+                        }
+                    })
+                    ->afterStateHydrated(function ($state, $record, \Filament\Forms\Set $set) {
+                        // When loading an existing record, set the fields correctly
+                        if ($record && $record->invoice) {
+                            // Get the procurement ID from the invoice's purchase
+                            $purchase = $record->invoice->purchase;
+                            if ($purchase) {
+                                $set('number', $purchase->number);
                             }
+
+                            $set('invoice_code', $record->invoice->code);
+                            $set('invoice_id', $record->invoice_id);
                         }
                     }),
+
+                Forms\Components\Hidden::make('invoice_id')
+                    ->required(),
+
+                Forms\Components\TextInput::make('invoice_code')
+                    ->label(__('resources.shipping_document.invoice'))
+                    ->disabled()
+                    ->dehydrated(false),
+
                 Forms\Components\Select::make('supplier_id')
                     ->label(__('resources.shipping_document.supplier'))
                     ->relationship('supplier', 'name')
@@ -155,10 +192,17 @@ class ShippingDocumentResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('number')
                     ->label(__('resources.shipping_document.number'))
+                    ->formatStateUsing(function ($record) {
+                        // Get the procurement number through the invoice->purchase relationship
+                        return $record->invoice?->purchase?->procurement?->number ?? 'N/A';
+                    })
                     ->searchable(),
+
                 Tables\Columns\TextColumn::make('invoice.code')
                     ->label(__('resources.shipping_document.invoice'))
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('supplier.name')
                     ->label(__('resources.shipping_document.supplier'))
                     ->searchable()
@@ -260,3 +304,7 @@ class ShippingDocumentResource extends Resource
             ]);
     }
 }
+
+
+
+
