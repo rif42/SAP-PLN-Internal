@@ -25,6 +25,7 @@ class Procurement extends Model
         'end_date',
         'status',
         'status_at',
+        'dkmj_document',
     ];
 
     protected $casts = [
@@ -71,4 +72,5 @@ class Procurement extends Model
         return $this->hasMany(Purchase::class);
     }
 }
+
 

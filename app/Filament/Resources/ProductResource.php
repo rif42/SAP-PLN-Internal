@@ -42,17 +42,16 @@ class ProductResource extends Resource
                     ->required()
                     ->searchable()
                     ->createOptionForm([
-                        Forms\Components\TextInput::make('name')
-                            ->label(__('resources.category.name'))
-                            ->required(),
-                        Forms\Components\Textarea::make('description')
-                            ->label(__('resources.category.description')),
+                Forms\Components\TextInput::make('name')
+                    ->label(__('resources.category.name'))
+                    ->required(),
+                Forms\Components\Textarea::make('description')
+                    ->label(__('resources.category.description')),
                     ]),
                 Forms\Components\TextInput::make('barcode')
                     ->label(__('resources.product.barcode'))
                     ->required()
                     ->numeric(),
-
                 Forms\Components\Textarea::make('description')
                     ->label(__('resources.product.description'))
                     ->required()

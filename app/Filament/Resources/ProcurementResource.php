@@ -17,6 +17,8 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Models\Contract;
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class ProcurementResource extends Resource
 {
@@ -50,42 +52,70 @@ class ProcurementResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('code')
-                    ->label(__('resources.procurement.code'))
-                    ->required()
-                    ->unique(ignoreRecord: true)
-                    ->default(fn () => 'PRC-'.str_pad((Procurement::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT))
-                    ->readOnly(),
-                Forms\Components\TextInput::make('number')
-                    ->label(__('resources.procurement.number'))
-                    ->required()
-                    ->unique(ignoreRecord: true),
-                Forms\Components\TextInput::make('amp_id')
-                    ->label(__('resources.procurement.amp_id'))
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('penugasan_id')
-                    ->label(__('resources.procurement.penugasan_id'))
-                    ->required(),
-                Forms\Components\TextInput::make('kategori')
-                    ->label(__('resources.procurement.kategori'))
-                    ->required(),
-                Forms\Components\TextInput::make('nilai_penugasan')
-                    ->label(__('resources.procurement.nilai_penugasan'))
-                    ->required()
-                    ->numeric(),
-                Forms\Components\DatePicker::make('start_date')
-                    ->label(__('resources.procurement.start_date'))
-                    ->required(),
-                Forms\Components\DatePicker::make('end_date')
-                    ->label(__('resources.procurement.end_date'))
-                    ->required(),
-                Forms\Components\Select::make('status')
-                    ->label(__('resources.procurement.status'))
-                    ->options(ProductStatus::class)
-                    ->enum(ProductStatus::class)
-                    ->default(ProductStatus::PENDING)
-                    ->required(),
+                Forms\Components\Section::make(__('resources.procurement.documents'))
+                    ->schema([
+                        Forms\Components\FileUpload::make('dkmj_document')
+                            ->label(__('Input File DKMJ'))
+                            ->helperText('Upload dokumen DKMJ dalam format PDF')
+                            ->acceptedFileTypes(['application/pdf'])
+                            ->disk('public') // Explicitly set the disk to public
+                            ->directory('procurement-dkmj-documents')
+                            ->maxSize(10240) // 10MB
+                            ->downloadable()
+                            ->openable()
+                            ->previewable(true)
+                            // Custom file naming based on procurement code
+                            ->getUploadedFileNameForStorageUsing(
+                                function (TemporaryUploadedFile $file, callable $get) {
+                                    $code = $get('code');
+                                    return "DKMJ_{$code}.pdf";
+                                }
+                            )
+                            ->visibility('public')
+                            ->columnSpanFull(),
+
+                        // Existing document fields...
+                    ]),
+
+                Forms\Components\Section::make(__('resources.procurement.basic_info'))
+                    ->schema([
+                        Forms\Components\TextInput::make('code')
+                            ->label(__('resources.procurement.code'))
+                            ->required()
+                            ->unique(ignoreRecord: true)
+                            ->default(fn () => 'PRC-'.str_pad((Procurement::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT))
+                            ->readOnly(),
+                        Forms\Components\TextInput::make('number')
+                            ->label(__('resources.procurement.number'))
+                            ->required()
+                            ->unique(ignoreRecord: true),
+                        Forms\Components\TextInput::make('amp_id')
+                            ->label(__('resources.procurement.amp_id'))
+                            ->required()
+                            ->numeric(),
+                        Forms\Components\TextInput::make('penugasan_id')
+                            ->label(__('resources.procurement.penugasan_id'))
+                            ->required(),
+                        Forms\Components\TextInput::make('kategori')
+                            ->label(__('resources.procurement.kategori'))
+                            ->required(),
+                        Forms\Components\TextInput::make('nilai_penugasan')
+                            ->label(__('resources.procurement.nilai_penugasan'))
+                            ->required()
+                            ->numeric(),
+                        Forms\Components\DatePicker::make('start_date')
+                            ->label(__('resources.procurement.start_date'))
+                            ->required(),
+                        Forms\Components\DatePicker::make('end_date')
+                            ->label(__('resources.procurement.end_date'))
+                            ->required(),
+                        Forms\Components\Select::make('status')
+                            ->label(__('resources.procurement.status'))
+                            ->options(ProductStatus::class)
+                            ->enum(ProductStatus::class)
+                            ->default(ProductStatus::PENDING)
+                            ->required(),
+                    ]),
             ]);
     }
 
@@ -96,6 +126,16 @@ class ProcurementResource extends Resource
                 Tables\Columns\TextColumn::make('code')
                     ->label(__('resources.procurement.code'))
                     ->searchable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label(__('resources.procurement.status'))
+                    ->badge()
+                    ->color(fn (ProductStatus $state): string => match ($state) {
+                        ProductStatus::CANCELED => 'danger',
+                        ProductStatus::PENDING => 'warning',
+                        ProductStatus::DONE => 'success',
+                    })
+                    ->formatStateUsing(fn (ProductStatus $state): string => $state->getLabel())
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('number')
                     ->label(__('resources.procurement.number'))
                     ->searchable(),
@@ -123,16 +163,6 @@ class ProcurementResource extends Resource
                     ->label(__('resources.procurement.end_date'))
                     ->date('d M Y')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('status')
-                    ->label(__('resources.procurement.status'))
-                    ->badge()
-                    ->color(fn (ProductStatus $state): string => match ($state) {
-                        ProductStatus::CANCELED => 'danger',
-                        ProductStatus::PENDING => 'warning',
-                        ProductStatus::DONE => 'success',
-                    })
-                    ->formatStateUsing(fn (ProductStatus $state): string => $state->getLabel())
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('status_at')
                     ->label(__('resources.procurement.status_at'))
                     ->dateTime('d M Y H:i')
@@ -153,6 +183,20 @@ class ProcurementResource extends Resource
                     ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('dkmj_document')
+                    ->label('File DKMJ')
+                    ->formatStateUsing(function ($state, $record) {
+                        if (empty($state)) {
+                            return '-';
+                        }
+
+                        return "DKMJ_{$record->code}.pdf";
+                    })
+                    ->icon('heroicon-o-document-text')
+                    ->color('success')
+                    ->url(fn ($record) => $record->dkmj_document ? Storage::disk('public')->url($record->dkmj_document) : null)
+                    ->openUrlInNewTab()
+                    ->searchable(),
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
@@ -195,6 +239,20 @@ class ProcurementResource extends Resource
         ];
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

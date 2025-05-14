@@ -72,7 +72,8 @@ return [
         'description' => 'Deskripsi',
     ],
     'procurement' => [
-        'label' => 'Pengadaan',
+        'basic_info' => 'Informasi DKMJ',
+        'documents' => 'Dokumen',        'label' => 'Pengadaan',
         'code' => 'Kode',
         'number' => 'Nomor WO',
         'amp_id' => 'AMP ID',
