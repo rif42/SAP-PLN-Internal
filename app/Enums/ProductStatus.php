@@ -4,6 +4,21 @@ namespace App\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
+enum ProductStockStatus: string implements HasLabel
+{
+    case IN = 'in';
+    case OUT = 'out';
+
+
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::IN => 'Masuk',
+            self::OUT => 'Keluar',
+        };
+    }
+}
+
 enum ProductStatus: string implements HasLabel
 {
     case CANCELED = 'canceled';
@@ -14,8 +29,9 @@ enum ProductStatus: string implements HasLabel
     {
         return match ($this) {
             self::CANCELED => 'Dibatalkan',
-            self::PENDING => 'Tertunda',
+            self::PENDING => 'Menunggu',
             self::DONE => 'Selesai',
         };
     }
 }
+

@@ -67,6 +67,11 @@ class Invoice extends Model
         return $this->hasMany(InvoiceProduct::class);
     }
 
+    public function procurement(): BelongsTo
+    {
+        return $this->belongsTo(Procurement::class);
+    }
+
     public function shippingDocuments(): HasMany
     {
         return $this->hasMany(ShippingDocument::class);

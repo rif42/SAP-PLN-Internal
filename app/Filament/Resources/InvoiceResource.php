@@ -14,6 +14,9 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Get;
 
 class InvoiceResource extends Resource
 {
@@ -55,24 +58,51 @@ class InvoiceResource extends Resource
                     ->unique(ignoreRecord: true)
                     ->default(fn () => 'INV-'.str_pad((Invoice::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT))
                     ->readOnly(),
-                Forms\Components\TextInput::make('number')
+
+                Forms\Components\Select::make('number')
                     ->label(__('resources.invoice.number'))
-                    ->required()
-                    ->unique(ignoreRecord: true),
-                Forms\Components\Select::make('purchase_id')
-                    ->label(__('resources.invoice.purchase'))
-                    ->relationship('purchase', 'code', fn (Builder $query) => $query->selectRaw("id, code || ' - ' || number as code"))
-                    ->required()
+                    ->options(function () {
+                        return \App\Models\Purchase::with('procurement')
+                            ->get()
+                            ->mapWithKeys(function ($purchase) {
+                                return [
+                                    $purchase->id => $purchase->procurement?->number ?? 'Tanpa Nomor',
+                                ];
+                            });
+                    })
                     ->searchable()
                     ->live()
-                    ->afterStateUpdated(function ($state, Forms\Set $set) {
-                        if ($state) {
-                            $purchase = \App\Models\Purchase::find($state);
-                            if ($purchase) {
-                                $set('supplier_id', $purchase->supplier_id);
-                            }
+                    ->afterStateUpdated(function ($state, \Filament\Forms\Set $set) {
+                        $purchase = \App\Models\Purchase::with('procurement')->find($state);
+                        if ($purchase) {
+                            // Set the actual purchase_id for database storage
+                            $set('purchase_id', $state);
+
+                            // Set a display field for showing the purchase code to the user
+                            $set('purchase_code', $purchase->code);
+                        }
+                    })
+                    ->afterStateHydrated(function ($state, $record, \Filament\Forms\Set $set) {
+                        // When loading an existing record, set the purchase_code field
+                        if ($record && $record->purchase) {
+                            $set('purchase_code', $record->purchase->code);
+
+                            // Also set the number field to the purchase_id for the dropdown
+                            $set('number', $record->purchase_id);
                         }
                     }),
+
+                // Hidden field to store the actual purchase_id for the database relationship
+                Forms\Components\Hidden::make('purchase_id')
+                    ->required(),
+
+                // Display-only field to show the purchase code to the user
+                Forms\Components\TextInput::make('purchase_code')
+                    ->label(__('resources.invoice.purchase'))
+                    ->disabled()
+                    ->dehydrated(false),
+
+
                 Forms\Components\Select::make('supplier_id')
                     ->label(__('resources.invoice.supplier'))
                     ->relationship('supplier', 'name')
@@ -130,20 +160,6 @@ class InvoiceResource extends Resource
                 Tables\Columns\TextColumn::make('code')
                     ->label(__('resources.invoice.code'))
                     ->searchable(),
-                Tables\Columns\TextColumn::make('number')
-                    ->label(__('resources.invoice.number'))
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('date')
-                    ->label(__('resources.invoice.date'))
-                    ->date('d M Y')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('purchase.code')
-                    ->label(__('resources.invoice.purchase'))
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('supplier.name')
-                    ->label(__('resources.invoice.supplier'))   
-                    ->searchable()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->label(__('resources.invoice.status'))
                     ->badge()
@@ -154,6 +170,26 @@ class InvoiceResource extends Resource
                     })
                     ->formatStateUsing(fn (ProductStatus $state): string => $state->getLabel())
                     ->sortable(),
+                Tables\Columns\TextColumn::make('number')
+                    ->label(__('resources.invoice.number'))
+                    ->formatStateUsing(function ($record) {
+                        // Get the procurement number through the purchase relationship
+                        return $record->purchase?->procurement?->number ?? 'N/A';
+                    })
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('date')
+                    ->label(__('resources.invoice.date'))
+                    ->date('d M Y')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('purchase.code') // Changed from purchase_id to purchase.code
+                    ->label(__('resources.invoice.purchase'))
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('supplier.name')
+                    ->label(__('resources.invoice.supplier'))
+                    ->searchable()
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('status_at')
                     ->label(__('resources.invoice.status_at'))
                     ->dateTime('d M Y H:i')
@@ -192,7 +228,7 @@ class InvoiceResource extends Resource
                 Tables\Actions\Action::make('view_shipping_documents')
                     ->label(__('resources.invoice.view_shipping_documents'))
                     ->icon('heroicon-o-document')
-                    ->url(fn (Invoice $record): string => 
+                    ->url(fn (Invoice $record): string =>
                         ShippingDocumentResource::getUrl('index', ['tableFilters[invoice][value]' => $record->id]))
                     ->openUrlInNewTab(),
                 Tables\Actions\EditAction::make(),
@@ -234,3 +270,10 @@ class InvoiceResource extends Resource
             ]);
     }
 }
+
+
+
+
+
+
+
