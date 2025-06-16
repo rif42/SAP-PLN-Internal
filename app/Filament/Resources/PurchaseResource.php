@@ -15,6 +15,9 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Get;
 
 class PurchaseResource extends Resource
 {
@@ -23,7 +26,7 @@ class PurchaseResource extends Resource
     protected static ?string $navigationGroup = 'Procurement';
     protected static ?int $navigationSort = 20;
 
-    public static function getModelLabel(): string 
+    public static function getModelLabel(): string
     {
         return __('resources.purchase.label');
     }
@@ -48,61 +51,84 @@ class PurchaseResource extends Resource
                     ->unique(ignoreRecord: true)
                     ->default(fn () => 'PUR-'.str_pad((Purchase::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT))
                     ->readOnly(),
-                Forms\Components\TextInput::make('number')
+                Forms\Components\Select::make('number')
                     ->label(__('resources.purchase.number'))
-                    ->required()
-                    ->unique(ignoreRecord: true),
-                Forms\Components\Select::make('procurement_id')
-                    ->label(__('resources.purchase.procurement'))
-                    ->relationship('procurement', 'code', fn (Builder $query) => $query->selectRaw("id, code || ' - ' || number as code"))
-                    ->required()
                     ->searchable()
+                    ->options(function () {
+                        return \App\Models\Procurement::pluck('number', 'id'); // id disimpan, number ditampilkan
+                    })
                     ->live()
-                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                    ->afterStateUpdated(function ($state, \Filament\Forms\Set $set) {
                         if ($state) {
                             $procurement = \App\Models\Procurement::find($state);
                             if ($procurement) {
-                                $set('supplier_id', $procurement->supplier_id);
+                                $set('procurement_id', $procurement->penugasan_id);
                             }
                         }
-                    }),
+                    })
+                    ->required(),
+
+                Forms\Components\Hidden::make('number')
+                ->required(),
+
+                Forms\Components\TextInput::make('procurement_id')
+                ->label(__('resources.purchase.procurement'))
+                ->disabled()
+                ->dehydrated(false)
+                ->afterStateHydrated(function (\Filament\Forms\Components\TextInput $component, $state) {
+                    $record = $component->getRecord();
+                    if ($record?->number) {
+                        $procurement = \App\Models\Procurement::find($record->number);
+                        $component->state($procurement?->penugasan_id);
+                    }
+                }),
+
                 Forms\Components\Select::make('supplier_id')
-                    ->label(__('resources.purchase.supplier'))
-                    ->relationship('supplier', 'name')
-                    ->required()
-                    ->searchable()
-                    ->createOptionForm([
-                        Forms\Components\TextInput::make('name')
-                            ->label(__('resources.supplier.name'))
-                            ->required()
-                            ->columnSpanFull(),
-                        Forms\Components\Section::make(__('resources.supplier.sales_contact'))
-                            ->schema([
-                                Forms\Components\TextInput::make('sales_name')
-                                    ->label(__('resources.supplier.sales_name'))
-                                    ->required(),
-                                Forms\Components\TextInput::make('sales_phone')
-                                    ->label(__('resources.supplier.sales_phone'))
-                                    ->required()
-                                    ->tel(),
-                                Forms\Components\TextInput::make('sales_email')
-                                    ->label(__('resources.supplier.sales_email'))
-                                    ->email(),
-                            ])->columns(3),
-                        Forms\Components\Section::make(__('resources.supplier.logistics_contact'))
-                            ->schema([
-                                Forms\Components\TextInput::make('logistics_name')
-                                    ->label(__('resources.supplier.logistics_name'))
-                                    ->required(),
-                                Forms\Components\TextInput::make('logistics_phone')
-                                    ->label(__('resources.supplier.logistics_phone'))
-                                    ->required()
-                                    ->tel(),
-                                Forms\Components\TextInput::make('logistics_email')
-                                    ->label(__('resources.supplier.logistics_email'))
-                                    ->email(),
-                            ])->columns(3),
-                    ]),
+                ->label(__('resources.purchase.supplier'))
+                ->relationship('supplier', 'name')
+                ->required()
+                ->searchable()
+                ->getSearchResultsUsing(function (string $search) {
+                    return \App\Models\Supplier::where('name', 'like', "%{$search}%")
+                        ->limit(20)
+                        ->pluck('name', 'id');
+                })
+                ->getOptionLabelUsing(fn ($value): ?string => \App\Models\Supplier::find($value)?->name)
+                ->createOptionForm([
+                    Forms\Components\TextInput::make('name')
+                        ->label(__('resources.supplier.name'))
+                        ->required()
+                        ->columnSpanFull(),
+
+                    Forms\Components\Section::make(__('resources.supplier.sales_contact'))
+                        ->schema([
+                            Forms\Components\TextInput::make('sales_name')
+                                ->label(__('resources.supplier.sales_name'))
+                                ->required(),
+                            Forms\Components\TextInput::make('sales_phone')
+                                ->label(__('resources.supplier.sales_phone'))
+                                ->required()
+                                ->tel(),
+                            Forms\Components\TextInput::make('sales_email')
+                                ->label(__('resources.supplier.sales_email'))
+                                ->email(),
+                        ])->columns(3),
+                    Forms\Components\Section::make(__('resources.supplier.logistics_contact'))
+                        ->schema([
+                            Forms\Components\TextInput::make('logistics_name')
+                                ->label(__('resources.supplier.logistics_name'))
+                                ->required(),
+                            Forms\Components\TextInput::make('logistics_phone')
+                                ->label(__('resources.supplier.logistics_phone'))
+                                ->required()
+                                ->tel(),
+                            Forms\Components\TextInput::make('logistics_email')
+                                ->label(__('resources.supplier.logistics_email'))
+                                ->email(),
+                        ])->columns(3),
+                ]),
+
+
                 Forms\Components\DatePicker::make('purchase_date')
                     ->label(__('resources.purchase.purchase_date'))
                     ->required(),
@@ -122,20 +148,6 @@ class PurchaseResource extends Resource
                 Tables\Columns\TextColumn::make('code')
                     ->label(__('resources.purchase.code'))
                     ->searchable(),
-                Tables\Columns\TextColumn::make('number')
-                    ->label(__('resources.purchase.number'))
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('procurement.code')
-                    ->label(__('resources.purchase.procurement'))
-                    ->formatStateUsing(fn ($record) => $record->procurement->code.' - '.$record->procurement->number)
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('supplier.name')
-                    ->label(__('resources.purchase.supplier'))
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('purchase_date')
-                    ->label(__('resources.purchase.purchase_date'))
-                    ->date('d M Y')
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->label(__('resources.procurement.status'))
                     ->badge()
@@ -146,6 +158,22 @@ class PurchaseResource extends Resource
                     })
                     ->formatStateUsing(fn (ProductStatus $state): string => $state->getLabel())
                     ->sortable(),
+                Tables\Columns\TextColumn::make('number')
+                    ->label(__('resources.purchase.number'))
+                    ->formatStateUsing(fn ($record) => $record->procurement?->number)
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('procurement')
+                    ->label(__('resources.purchase.procurement'))
+                    ->formatStateUsing(fn ($record) => $record->procurement?->penugasan_id)
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('supplier.name')
+                    ->label(__('resources.purchase.supplier'))
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('purchase_date')
+                    ->label(__('resources.purchase.purchase_date'))
+                    ->date('d M Y')
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('status_at')
                     ->label(__('resources.procurement.status_at'))
                     ->dateTime('d M Y H:i')
@@ -184,7 +212,7 @@ class PurchaseResource extends Resource
                 Tables\Actions\Action::make('view_invoices')
                     ->label(__('resources.purchase.view_invoices'))
                     ->icon('heroicon-o-document-text')
-                    ->url(fn (Purchase $record): string => 
+                    ->url(fn (Purchase $record): string =>
                         InvoiceResource::getUrl('index', ['tableFilters[purchase][value]' => $record->id]))
                     ->openUrlInNewTab(),
                 Tables\Actions\EditAction::make(),

@@ -21,6 +21,7 @@ class Contract extends Model
         'total_amount',
         'status',
         'status_at',
+        'procurement_id'
     ];
 
     protected $casts = [
@@ -61,4 +62,10 @@ class Contract extends Model
     {
         return $this->hasMany(ContractProduct::class);
     }
+
+    public function procurement()
+    {
+        return $this->belongsTo(Procurement::class);
+    }
 }
+

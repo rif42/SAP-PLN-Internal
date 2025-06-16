@@ -29,15 +29,38 @@ class ShippingDocumentsRelationManager extends RelationManager
                     ->unique(ignoreRecord: true)
                     ->default(fn () => 'SHP-'.str_pad((ShippingDocument::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT))
                     ->readOnly(),
-                Forms\Components\TextInput::make('number')
+
+                // Use the procurement number from the parent invoice
+                Forms\Components\Select::make('number')
                     ->label(__('resources.shipping_document.number'))
-                    ->required()
-                    ->unique(ignoreRecord: true),
+                    ->options(function ($livewire) {
+                        $invoice = $livewire->getOwnerRecord();
+                        if ($invoice->purchase) {
+                            return [$invoice->purchase->number => $invoice->purchase->procurement?->number ?? 'N/A'];
+                        }
+                        return [];
+                    })
+                    ->default(function ($livewire) {
+                        $invoice = $livewire->getOwnerRecord();
+                        return $invoice->purchase?->number;
+                    })
+                    ->disabled() // Since there's only one option in the relation manager
+                    ->dehydrated(false), // We don't need to save this
+
+                // The invoice_id is automatically set from the parent record
+                Forms\Components\Hidden::make('invoice_id')
+                    ->default(function ($livewire) {
+                        return $livewire->getOwnerRecord()->id;
+                    }),
+
                 Forms\Components\Select::make('supplier_id')
                     ->label(__('resources.shipping_document.supplier'))
                     ->relationship('supplier', 'name')
                     ->required()
                     ->searchable()
+                    ->default(function ($livewire) {
+                        return $livewire->getOwnerRecord()->supplier_id;
+                    })
                     ->createOptionForm([
                         Forms\Components\TextInput::make('name')
                             ->label(__('resources.supplier.name'))
@@ -170,3 +193,4 @@ class ShippingDocumentsRelationManager extends RelationManager
             ]);
     }
 }
+

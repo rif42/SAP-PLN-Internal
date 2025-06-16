@@ -29,14 +29,6 @@ class ProductsRelationManager extends RelationManager
                     ->required()
                     ->searchable()
                     ->live()
-                    ->afterStateUpdated(function ($state, Forms\Set $set) {
-                        if ($state) {
-                            $product = Product::find($state);
-                            if ($product) {
-                                $set('price', number_format($product->price, 0, ',', '.'));
-                            }
-                        }
-                    })
                     ->createOptionForm([
                         Forms\Components\TextInput::make('name')
                             ->label(__('resources.product.name'))
@@ -50,24 +42,10 @@ class ProductsRelationManager extends RelationManager
                             ->label(__('resources.product.barcode'))
                             ->required()
                             ->numeric(),
-                        Forms\Components\TextInput::make('price')
-                            ->label(__('resources.product.price'))
-                            ->required()
-                            ->mask(RawJs::make('$money($input, \',\')'))
-                            ->stripCharacters('.')
-                            ->numeric()
-                            ->prefix('Rp'),
-                        Forms\Components\Textarea::make('description')
+                       Forms\Components\Textarea::make('description')
                             ->label(__('resources.product.description'))
                             ->required(),
                     ]),
-                Forms\Components\TextInput::make('price')
-                    ->label(__('resources.procurement_product.price'))
-                    ->required()
-                    ->mask(RawJs::make('$money($input, \',\')'))
-                    ->stripCharacters('.')
-                    ->numeric()
-                    ->prefix('Rp'),
                 Forms\Components\TextInput::make('quantity')
                     ->label(__('resources.procurement_product.quantity'))
                     ->required()
@@ -87,13 +65,8 @@ class ProductsRelationManager extends RelationManager
             ->recordTitleAttribute('product.name')
             ->columns([
                 Tables\Columns\TextColumn::make('product.name')
-                    ->formatStateUsing(fn ($record) => $record->product->code.' - '.$record->product->name)
+                    ->formatStateUsing(fn ($record) => $record->product->name)
                     ->label(__('resources.procurement_product.product'))
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('price')
-                    ->label(__('resources.procurement_product.price'))
-                    ->money('IDR')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('quantity')
@@ -152,3 +125,5 @@ class ProductsRelationManager extends RelationManager
             ]);
     }
 }
+
+

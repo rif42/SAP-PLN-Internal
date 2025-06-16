@@ -45,7 +45,7 @@ class ProductsRelationManager extends RelationManager
                         })->map(function ($items) use ($invoice) {
                             // Get the product label
                             $label = $items->first()['label'];
-                            
+
                             // Calculate quantities
                             $totalQuantity = $items->sum('quantity');
                             $usedQuantity = $invoice->products()
@@ -68,7 +68,7 @@ class ProductsRelationManager extends RelationManager
                         function (Get $get, ?InvoiceProduct $record = null) {
                             return function (string $attribute, $value, \Closure $fail) use ($record) {
                                 $invoice = $this->getOwnerRecord();
-                                
+
                                 // Get total quantity from purchase
                                 $purchaseProductQuantity = $invoice->purchase->products()
                                     ->where('product_id', $value)
@@ -98,7 +98,7 @@ class ProductsRelationManager extends RelationManager
                         }
 
                         $invoice = $this->getOwnerRecord();
-                        
+
                         // Get purchase product details
                         $purchaseProduct = $invoice->purchase->products()
                             ->where('product_id', $state)
@@ -107,9 +107,9 @@ class ProductsRelationManager extends RelationManager
                         if (!$purchaseProduct) {
                             return;
                         }
-                        
+
                         // Set price from purchase
-                        $set('price', number_format($purchaseProduct->price, 0, ',', '.'));
+                        // $set('price', number_format($purchaseProduct->price, 0, ',', '.'));
 
                         // Calculate remaining quantity
                         $purchaseProductQuantity = $invoice->purchase->products()
@@ -125,13 +125,13 @@ class ProductsRelationManager extends RelationManager
                         // Set initial quantity to remaining stock
                         $set('quantity', max(0, $remainingQuantity));
                     }),
-                Forms\Components\TextInput::make('price')
-                    ->label(__('resources.invoice_product.price'))
-                    ->required()
-                    ->mask(RawJs::make('$money($input, \',\')'))
-                    ->stripCharacters('.')
-                    ->numeric()
-                    ->prefix('Rp'),
+                // Forms\Components\TextInput::make('price')
+                //     ->label(__('resources.invoice_product.price'))
+                //     ->required()
+                //     ->mask(RawJs::make('$money($input, \',\')'))
+                //     ->stripCharacters('.')
+                //     ->numeric()
+                //     ->prefix('Rp'),
                 Forms\Components\TextInput::make('quantity')
                     ->label(__('resources.invoice_product.quantity'))
                     ->required()
@@ -160,7 +160,7 @@ class ProductsRelationManager extends RelationManager
 
                                 // Calculate how many items are still available
                                 $availableQuantity = $purchaseQuantity - $quantityInUse;
-                                
+
                                 // Check if requested quantity exceeds available amount
                                 $quantityAfterRequest = $availableQuantity - $value;
                                 if ($quantityAfterRequest < 0) {
@@ -188,11 +188,11 @@ class ProductsRelationManager extends RelationManager
                     ->formatStateUsing(fn ($record) => $record->product->code.' - '.$record->product->name)
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('price')
-                    ->label(__('resources.invoice_product.price'))
-                    ->money('IDR')
-                    ->searchable()
-                    ->sortable(),
+                // Tables\Columns\TextColumn::make('price')
+                //     ->label(__('resources.invoice_product.price'))
+                //     ->money('IDR')
+                //     ->searchable()
+                //     ->sortable(),
                 Tables\Columns\TextColumn::make('quantity')
                     ->label(__('resources.invoice_product.quantity'))
                     ->numeric()

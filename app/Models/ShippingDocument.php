@@ -21,6 +21,7 @@ class ShippingDocument extends Model
         'supplier_id',
         'status',
         'status_at',
+        'suratJalan_document',
     ];
 
     protected $casts = [

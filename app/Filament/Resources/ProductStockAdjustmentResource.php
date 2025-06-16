@@ -7,6 +7,7 @@ use App\Filament\Resources\ProductStockAdjustmentResource\Pages;
 use App\Models\ProductStockAdjustment;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -48,15 +49,26 @@ class ProductStockAdjustmentResource extends Resource
                     ->relationship('product', 'name')
                     ->required()
                     ->searchable(),
-                Forms\Components\TextInput::make('quantity')
-                    ->label(__('resources.product_stock_adjustment.quantity'))
-                    ->required()
-                    ->numeric(),
                 Forms\Components\Select::make('type')
                     ->label(__('resources.product_stock_adjustment.type'))
                     ->options(ProductStockStatus::class)
                     ->enum(ProductStockStatus::class)
-                    ->required(),
+                    ->required()
+                    ->live(),
+                Forms\Components\TextInput::make('quantity')
+                    ->label(__('resources.product_stock_adjustment.quantity'))
+                    ->required()
+                    ->numeric()
+                    ->minValue(1)
+                    ->helperText(function (Get $get) {
+                        $type = $get('type');
+                        if ($type === ProductStockStatus::IN->value) {
+                            return 'Nilai akan ditambahkan ke stok produk';
+                        } elseif ($type === ProductStockStatus::OUT->value) {
+                            return 'Nilai akan dikurangkan dari stok produk';
+                        }
+                        return '';
+                    }),
                 Forms\Components\Textarea::make('reason')
                     ->label(__('resources.product_stock_adjustment.reason'))
                     ->columnSpanFull(),
@@ -126,3 +138,6 @@ class ProductStockAdjustmentResource extends Resource
         ];
     }
 }
+
+
+

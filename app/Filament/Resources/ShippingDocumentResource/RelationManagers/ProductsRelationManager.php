@@ -49,7 +49,7 @@ class ProductsRelationManager extends RelationManager
                         })->map(function ($items) use ($shippingDocument) {
                             // Get the product label
                             $label = $items->first()['label'];
-                            
+
                             // Calculate quantities
                             $totalQuantity = $items->sum('quantity');
 
@@ -73,7 +73,7 @@ class ProductsRelationManager extends RelationManager
                         function (Get $get, ?ShippingDocumentProduct $record = null) {
                             return function (string $attribute, $value, \Closure $fail) use ($record) {
                                 $shippingDocument = $this->getOwnerRecord();
-                                
+
                                 // Get total quantity from invoice
                                 $invoiceProductQuantity = $shippingDocument->invoice->products()
                                     ->where('product_id', $value)
@@ -103,7 +103,7 @@ class ProductsRelationManager extends RelationManager
                         }
 
                         $shippingDocument = $this->getOwnerRecord();
-                        
+
                         // Get invoice product details
                         $invoiceProduct = $shippingDocument->invoice->products()
                             ->where('product_id', $state)
@@ -112,9 +112,9 @@ class ProductsRelationManager extends RelationManager
                         if (!$invoiceProduct) {
                             return;
                         }
-                        
+
                         // Set price from invoice
-                        $set('price', number_format($invoiceProduct->price, 0, ',', '.'));
+                        // $set('price', number_format($invoiceProduct->price, 0, ',', '.'));
 
                         // Calculate remaining quantity
                         $invoiceProductQuantity = $shippingDocument->invoice->products()
@@ -130,13 +130,13 @@ class ProductsRelationManager extends RelationManager
                         // Set initial quantity to remaining stock
                         $set('quantity', max(0, $remainingQuantity));
                     }),
-                Forms\Components\TextInput::make('price')
-                    ->label(__('resources.shipping_document_product.price'))
-                    ->required()
-                    ->mask(RawJs::make('$money($input, \',\')'))
-                    ->stripCharacters('.')
-                    ->numeric()
-                    ->prefix('Rp'),
+                // Forms\Components\TextInput::make('price')
+                //     ->label(__('resources.shipping_document_product.price'))
+                //     ->required()
+                //     ->mask(RawJs::make('$money($input, \',\')'))
+                //     ->stripCharacters('.')
+                //     ->numeric()
+                //     ->prefix('Rp'),
                 Forms\Components\TextInput::make('quantity')
                     ->label(__('resources.shipping_document_product.quantity'))
                     ->required()
@@ -165,7 +165,7 @@ class ProductsRelationManager extends RelationManager
 
                                 // Calculate how many items are still available
                                 $availableQuantity = $invoiceQuantity - $quantityInUse;
-                                
+
                                 // Check if requested quantity exceeds available amount
                                 $quantityAfterRequest = $availableQuantity - $value;
                                 if ($quantityAfterRequest < 0) {
@@ -207,7 +207,7 @@ class ProductsRelationManager extends RelationManager
                                 'causer_id' => $record->id
                             ]);
                         }
-                        
+
                         if ($state !== 'done' && $record && $record->status === ProductStatus::DONE) {
                             // Decrease product stock
                             Product::where('id', $record->product_id)->decrement('stock', $record->quantity);
@@ -235,11 +235,11 @@ class ProductsRelationManager extends RelationManager
                     ->formatStateUsing(fn ($record) => $record->product->code.' - '.$record->product->name)
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('price')
-                    ->label(__('resources.shipping_document_product.price'))
-                    ->money('IDR')
-                    ->searchable()
-                    ->sortable(),
+                // Tables\Columns\TextColumn::make('price')
+                //     ->label(__('resources.shipping_document_product.price'))
+                //     ->money('IDR')
+                //     ->searchable()
+                //     ->sortable(),
                 Tables\Columns\TextColumn::make('quantity')
                     ->label(__('resources.shipping_document_product.quantity'))
                     ->numeric()

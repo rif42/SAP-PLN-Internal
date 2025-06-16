@@ -53,7 +53,7 @@ class Purchase extends Model
 
     public function procurement(): BelongsTo
     {
-        return $this->belongsTo(Procurement::class);
+        return $this->belongsTo(Procurement::class, 'number');
     }
 
     public function products(): HasMany
