@@ -81,6 +81,16 @@ class ContractResource extends Resource
                                     ->email(),
                             ])->columns(3),
                     ]),
+                Forms\Components\Select::make('procurement_id')
+                    ->label(__('resources.contract.procurement'))
+                    ->relationship(
+                        'procurement',
+                        'code',
+                        fn(Builder $query) => $query->selectRaw("id, 'AMP ID: ' || code || ' — Work Order: ' || number as code")
+                    )
+                    ->required()
+                    ->searchable()
+                    ->live(),
                 Forms\Components\DateTimePicker::make('start_date')
                     ->label(__('resources.contract.start_date'))
                     ->required(),
@@ -110,6 +120,11 @@ class ContractResource extends Resource
                     ->label(__('resources.contract.supplier'))
                     ->numeric()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('procurement.code')
+                    ->label(__('resources.contract.procurement'))
+                    ->formatStateUsing(fn($record) => "AMP ID: <b>{$record->procurement->code}</b><br>Work Order: <b>{$record->procurement->number}</b>")
+                    ->sortable()
+                    ->html(),
                 Tables\Columns\TextColumn::make('start_date')
                     ->label(__('resources.contract.start_date'))
                     ->dateTime()
@@ -125,13 +140,13 @@ class ContractResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->label(__('resources.contract.status'))
                     ->badge()
-                    ->color(fn (ContractStatus $state): string => match ($state) {
+                    ->color(fn(ContractStatus $state): string => match ($state) {
                         ContractStatus::Pending => 'warning',
                         ContractStatus::Active => 'success',
                         ContractStatus::Canceled => 'danger',
                         ContractStatus::Done => 'info',
                     })
-                    ->formatStateUsing(fn (ContractStatus $state): string => $state->getLabel())
+                    ->formatStateUsing(fn(ContractStatus $state): string => $state->getLabel())
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label(__('resources.contract.created_at'))

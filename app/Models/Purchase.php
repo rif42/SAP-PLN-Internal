@@ -42,7 +42,7 @@ class Purchase extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['supplier.name', 'purchase_date', 'procurement.name'])
+            ->logOnly(['supplier.name', 'purchase_date', 'procurement.code'])
             ->logOnlyDirty();
     }
 

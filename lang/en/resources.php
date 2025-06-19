@@ -21,6 +21,7 @@ return [
     'contract' => [
         'label' => 'Contracts',
         'supplier' => 'Supplier',
+        'procurement' => 'Procurement',
         'start_date' => 'Start Date',
         'end_date' => 'End Date',
         'total_amount' => 'Total Amount',

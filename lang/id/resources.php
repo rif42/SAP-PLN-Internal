@@ -21,6 +21,7 @@ return [
     'contract' => [
         'label' => 'Pekerjaan',
         'supplier' => 'Pemasok',
+        'procurement' => 'Pengadaan',
         'start_date' => 'Tanggal Mulai',
         'end_date' => 'Tanggal Berakhir',
         'total_amount' => 'Total Nilai',

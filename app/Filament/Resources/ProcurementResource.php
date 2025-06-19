@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Enums\ProductStatus;
 use App\Filament\Resources\ProcurementResource\Pages;
-use App\Filament\Resources\ProcurementResource\RelationManagers\InvoicesRelationManager;
 use App\Filament\Resources\ProcurementResource\RelationManagers\ProductsRelationManager;
 use App\Filament\Resources\ProcurementResource\RelationManagers\PurchasesRelationManager;
 use App\Models\Procurement;
@@ -13,10 +12,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use App\Models\Contract;
-use Illuminate\Support\Carbon;
-use Illuminate\Database\Eloquent\Model;
 
 class ProcurementResource extends Resource
 {
@@ -60,30 +55,6 @@ class ProcurementResource extends Resource
                     ->label(__('resources.procurement.number'))
                     ->required()
                     ->unique(ignoreRecord: true),
-                Forms\Components\Select::make('contract_id')
-                    ->label(__('resources.procurement.contract'))
-                    ->relationship(
-                        name: 'contract',
-                        modifyQueryUsing: fn(Builder $query) => $query
-                            ->join('suppliers', 'contracts.supplier_id', '=', 'suppliers.id')
-                            ->select(
-                                'contracts.id',
-                                'suppliers.name as supplier_name',
-                                'contracts.start_date',
-                                'contracts.end_date'
-                            )
-                    )
-                    ->getOptionLabelFromRecordUsing(function (Model $record) {
-                        $startDate = Carbon::parse($record->start_date)->format('d M Y');
-                        $endDate = Carbon::parse($record->end_date)->format('d M Y');
-
-                        return "{$record->supplier_name} ({$startDate} - {$endDate})";
-                    })
-                    ->required()
-                    ->searchable(
-                        ['supplier_name', 'contracts.start_date', 'contracts.end_date', 'contracts.total_amount']
-                    )
-                    ->live(),
                 Forms\Components\DatePicker::make('start_date')
                     ->label(__('resources.procurement.start_date'))
                     ->required(),
@@ -120,20 +91,6 @@ class ProcurementResource extends Resource
                 Tables\Columns\TextColumn::make('number')
                     ->label(__('resources.procurement.number'))
                     ->searchable(),
-                Tables\Columns\TextColumn::make('contract.id')
-                    ->label(__('resources.procurement.contract'))
-                    ->formatStateUsing(function ($state, Procurement $record) {
-                        $contract = $record->contract; // Access the related contract model
-                        if (!$contract) {
-                            return '-';
-                        }
-                        $supplierName = $contract->supplier?->name ?? 'N/A';
-                        $startDate = $contract->start_date?->format('d M Y') ?? 'N/A';
-                        $endDate = $contract->end_date?->format('d M Y') ?? 'N/A';
-
-                        return "{$supplierName} ({$startDate} - {$endDate})";
-                    })
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('start_date')
                     ->label(__('resources.procurement.start_date'))
                     ->date('d M Y')
@@ -174,11 +131,6 @@ class ProcurementResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('supplier')
-                    ->label(__('resources.procurement.supplier'))
-                    ->relationship('contract.supplier', 'name')
-                    ->searchable()
-                    ->preload(),
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
