@@ -73,9 +73,9 @@ return [
     ],
     'procurement' => [
         'label' => 'Procurements',
-        'code' => 'Code',
-        'number' => 'Number',
-        'contract' => 'Pekerjaan',
+        'code' => 'AMP ID',
+        'number' => 'Work Order',
+        'contract' => 'Contract',
         'start_date' => 'Start Date',
         'end_date' => 'End Date',
         'status' => 'Status',
