@@ -115,6 +115,17 @@ class ShippingDocumentResource extends Resource
                     ->enum(ProductStatus::class)
                     ->default(ProductStatus::PENDING)
                     ->required(),
+                Forms\Components\FileUpload::make('attachments')
+                    ->label(__('resources.shipping_document.attachments'))
+                    ->multiple()
+                    ->directory('shipping-documents')
+                    ->disk('public')
+                    ->downloadable()
+                    ->openable()
+                    ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
+                    ->maxSize(51200) // 50MB
+                    ->helperText(__('resources.shipping_document.attachments_helper'))
+                    ->columnSpanFull(),
             ]);
     }
 

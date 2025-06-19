@@ -22,6 +22,7 @@ class Procurement extends Model
         'end_date',
         'status',
         'status_at',
+        'attachments',
     ];
 
     protected $casts = [
@@ -29,6 +30,7 @@ class Procurement extends Model
         'end_date' => 'date',
         'status' => ProductStatus::class,
         'status_at' => 'datetime',
+        'attachments' => 'array',
     ];
 
     protected static function booted()
