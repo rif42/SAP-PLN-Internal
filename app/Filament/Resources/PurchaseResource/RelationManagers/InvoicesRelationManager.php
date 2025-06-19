@@ -29,19 +29,10 @@ class InvoicesRelationManager extends RelationManager
                     ->unique(ignoreRecord: true)
                     ->default(fn () => 'INV-'.str_pad((Invoice::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT))
                     ->readOnly(),
-                 Forms\Components\Select::make('number')
+                Forms\Components\TextInput::make('number')
                     ->label(__('resources.invoice.number'))
-                    ->searchable()
-                    ->options(function () {
-                        return \App\Models\Invoice::pluck('number', 'id'); // id disimpan, number ditampilkan
-                    })
-                    ->live()
-                    ->required(),
-
-                Forms\Components\Hidden::make('number')
-                ->required(),
-
-
+                    ->required()
+                    ->unique(ignoreRecord: true),
                 Forms\Components\DatePicker::make('date')
                     ->label(__('resources.invoice.date'))
                     ->default(now())

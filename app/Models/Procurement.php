@@ -17,15 +17,11 @@ class Procurement extends Model
     protected $fillable = [
         'code',
         'number',
-        'amp_id',
-        'penugasan_id',
-        'kategori',
-        'nilai_penugasan',
+        'contract_id',
         'start_date',
         'end_date',
         'status',
         'status_at',
-        'dkmj_document',
     ];
 
     protected $casts = [
@@ -57,9 +53,9 @@ class Procurement extends Model
             ->logOnlyDirty();
     }
 
-    public function contract()
+    public function contract(): BelongsTo
     {
-        return $this->hasOne(Contract::class);
+        return $this->belongsTo(Contract::class);
     }
 
     public function products(): HasMany
@@ -72,6 +68,3 @@ class Procurement extends Model
         return $this->hasMany(Purchase::class);
     }
 }
-
-
-
