@@ -52,7 +52,7 @@ class ShippingDocumentResource extends Resource
                     ->label(__('resources.shipping_document.code'))
                     ->required()
                     ->unique(ignoreRecord: true)
-                    ->default(fn () => 'SHP-'.str_pad((ShippingDocument::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT))
+                    ->default(fn() => 'SHP-' . str_pad((ShippingDocument::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT))
                     ->readOnly(),
                 Forms\Components\TextInput::make('number')
                     ->label(__('resources.shipping_document.number'))
@@ -60,7 +60,7 @@ class ShippingDocumentResource extends Resource
                     ->unique(ignoreRecord: true),
                 Forms\Components\Select::make('invoice_id')
                     ->label(__('resources.shipping_document.invoice'))
-                    ->relationship('invoice', 'code', fn (Builder $query) => $query->selectRaw("id, code || ' - ' || number as code"))
+                    ->relationship('invoice', 'code', fn(Builder $query) => $query->selectRaw("id, '" . __('resources.invoice.code') . ": ' || code || ' — " . __('resources.invoice.number') . ": ' || number as code"))
                     ->required()
                     ->searchable()
                     ->live()
@@ -128,8 +128,20 @@ class ShippingDocumentResource extends Resource
                 Tables\Columns\TextColumn::make('number')
                     ->label(__('resources.shipping_document.number'))
                     ->searchable(),
+                Tables\Columns\TextColumn::make('invoice.purchase.procurement.code')
+                    ->label(__('resources.shipping_document.procurement'))
+                    ->formatStateUsing(fn($record) => __('resources.procurement.code') . ": <b>{$record->invoice->purchase->procurement->code}</b><br>" . __('resources.procurement.number') . ": <b>{$record->invoice->purchase->procurement->number}</b>")
+                    ->html()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('invoice.purchase.code')
+                    ->label(__('resources.shipping_document.purchase'))
+                    ->formatStateUsing(fn($record) => __('resources.purchase.code') . ": <b>{$record->invoice->purchase->code}</b><br>" . __('resources.purchase.number') . ": <b>{$record->invoice->purchase->number}</b>")
+                    ->html()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('invoice.code')
                     ->label(__('resources.shipping_document.invoice'))
+                    ->formatStateUsing(fn($record) => __('resources.invoice.code') . ": <b>{$record->invoice->code}</b><br>" . __('resources.invoice.number') . ": <b>{$record->invoice->number}</b>")
+                    ->html()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('supplier.name')
                     ->label(__('resources.shipping_document.supplier'))
@@ -138,12 +150,12 @@ class ShippingDocumentResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->label(__('resources.shipping_document.status'))
                     ->badge()
-                    ->color(fn (ProductStatus $state): string => match ($state) {
+                    ->color(fn(ProductStatus $state): string => match ($state) {
                         ProductStatus::CANCELED => 'danger',
                         ProductStatus::PENDING => 'warning',
                         ProductStatus::DONE => 'success',
                     })
-                    ->formatStateUsing(fn (ProductStatus $state): string => $state->getLabel())
+                    ->formatStateUsing(fn(ProductStatus $state): string => $state->getLabel())
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status_at')
                     ->label(__('resources.shipping_document.status_at'))

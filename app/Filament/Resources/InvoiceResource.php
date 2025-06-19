@@ -53,7 +53,7 @@ class InvoiceResource extends Resource
                     ->label(__('resources.invoice.code'))
                     ->required()
                     ->unique(ignoreRecord: true)
-                    ->default(fn () => 'INV-'.str_pad((Invoice::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT))
+                    ->default(fn() => 'INV-' . str_pad((Invoice::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT))
                     ->readOnly(),
                 Forms\Components\TextInput::make('number')
                     ->label(__('resources.invoice.number'))
@@ -61,7 +61,11 @@ class InvoiceResource extends Resource
                     ->unique(ignoreRecord: true),
                 Forms\Components\Select::make('purchase_id')
                     ->label(__('resources.invoice.purchase'))
-                    ->relationship('purchase', 'code', fn (Builder $query) => $query->selectRaw("id, code || ' - ' || number as code"))
+                    ->relationship(
+                        'purchase',
+                        'code',
+                        fn(Builder $query) => $query->selectRaw("id, '" . __('resources.purchase.code') . ": ' || code || ' — " . __('resources.purchase.number') . ": ' || number as code")
+                    )
                     ->required()
                     ->searchable()
                     ->live()
@@ -137,22 +141,29 @@ class InvoiceResource extends Resource
                     ->label(__('resources.invoice.date'))
                     ->date('d M Y')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('purchase.procurement.code')
+                    ->label(__('resources.invoice.procurement'))
+                    ->formatStateUsing(fn($record) => __('resources.procurement.code') . ": <b>{$record->purchase->procurement->code}</b><br>" . __('resources.procurement.number') . ": <b>{$record->purchase->procurement->number}</b>")
+                    ->html()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('purchase.code')
                     ->label(__('resources.invoice.purchase'))
+                    ->formatStateUsing(fn($record) => __('resources.purchase.code') . ": <b>{$record->purchase->code}</b><br>" . __('resources.purchase.number') . ": <b>{$record->purchase->number}</b>")
+                    ->html()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('supplier.name')
-                    ->label(__('resources.invoice.supplier'))   
+                    ->label(__('resources.invoice.supplier'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->label(__('resources.invoice.status'))
                     ->badge()
-                    ->color(fn (ProductStatus $state): string => match ($state) {
+                    ->color(fn(ProductStatus $state): string => match ($state) {
                         ProductStatus::CANCELED => 'danger',
                         ProductStatus::PENDING => 'warning',
                         ProductStatus::DONE => 'success',
                     })
-                    ->formatStateUsing(fn (ProductStatus $state): string => $state->getLabel())
+                    ->formatStateUsing(fn(ProductStatus $state): string => $state->getLabel())
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status_at')
                     ->label(__('resources.invoice.status_at'))
@@ -192,8 +203,8 @@ class InvoiceResource extends Resource
                 Tables\Actions\Action::make('view_shipping_documents')
                     ->label(__('resources.invoice.view_shipping_documents'))
                     ->icon('heroicon-o-document')
-                    ->url(fn (Invoice $record): string => 
-                        ShippingDocumentResource::getUrl('index', ['tableFilters[invoice][value]' => $record->id]))
+                    ->url(fn(Invoice $record): string =>
+                    ShippingDocumentResource::getUrl('index', ['tableFilters[invoice][value]' => $record->id]))
                     ->openUrlInNewTab(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),

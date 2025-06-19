@@ -23,7 +23,7 @@ class PurchaseResource extends Resource
     protected static ?string $navigationGroup = 'Procurement';
     protected static ?int $navigationSort = 20;
 
-    public static function getModelLabel(): string 
+    public static function getModelLabel(): string
     {
         return __('resources.purchase.label');
     }
@@ -46,7 +46,7 @@ class PurchaseResource extends Resource
                     ->label(__('resources.purchase.code'))
                     ->required()
                     ->unique(ignoreRecord: true)
-                    ->default(fn () => 'PUR-'.str_pad((Purchase::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT))
+                    ->default(fn() => 'PUR-' . str_pad((Purchase::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT))
                     ->readOnly(),
                 Forms\Components\TextInput::make('number')
                     ->label(__('resources.purchase.number'))
@@ -54,7 +54,11 @@ class PurchaseResource extends Resource
                     ->unique(ignoreRecord: true),
                 Forms\Components\Select::make('procurement_id')
                     ->label(__('resources.purchase.procurement'))
-                    ->relationship('procurement', 'code', fn (Builder $query) => $query->selectRaw("id, code || ' - ' || number as code"))
+                    ->relationship(
+                        'procurement',
+                        'code',
+                        fn(Builder $query) => $query->selectRaw("id, 'AMP ID: ' || code || ' — Work Order: ' || number as code")
+                    )
                     ->required()
                     ->searchable()
                     ->live()
@@ -127,8 +131,9 @@ class PurchaseResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('procurement.code')
                     ->label(__('resources.purchase.procurement'))
-                    ->formatStateUsing(fn ($record) => $record->procurement->code.' - '.$record->procurement->number)
-                    ->sortable(),
+                    ->formatStateUsing(fn($record) => "AMP ID: <b>{$record->procurement->code}</b><br>Work Order: <b>{$record->procurement->number}</b>")
+                    ->sortable()
+                    ->html(),
                 Tables\Columns\TextColumn::make('supplier.name')
                     ->label(__('resources.purchase.supplier'))
                     ->sortable(),
@@ -139,12 +144,12 @@ class PurchaseResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->label(__('resources.procurement.status'))
                     ->badge()
-                    ->color(fn (ProductStatus $state): string => match ($state) {
+                    ->color(fn(ProductStatus $state): string => match ($state) {
                         ProductStatus::CANCELED => 'danger',
                         ProductStatus::PENDING => 'warning',
                         ProductStatus::DONE => 'success',
                     })
-                    ->formatStateUsing(fn (ProductStatus $state): string => $state->getLabel())
+                    ->formatStateUsing(fn(ProductStatus $state): string => $state->getLabel())
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status_at')
                     ->label(__('resources.procurement.status_at'))
@@ -184,8 +189,8 @@ class PurchaseResource extends Resource
                 Tables\Actions\Action::make('view_invoices')
                     ->label(__('resources.purchase.view_invoices'))
                     ->icon('heroicon-o-document-text')
-                    ->url(fn (Purchase $record): string => 
-                        InvoiceResource::getUrl('index', ['tableFilters[purchase][value]' => $record->id]))
+                    ->url(fn(Purchase $record): string =>
+                    InvoiceResource::getUrl('index', ['tableFilters[purchase][value]' => $record->id]))
                     ->openUrlInNewTab(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
