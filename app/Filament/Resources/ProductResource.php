@@ -30,7 +30,7 @@ class ProductResource extends Resource
                 Forms\Components\TextInput::make('code')
                     ->label(__('resources.product.code'))
                     ->required()
-                    ->unique(ignoreRecord: true)
+                    ->unique()
                     ->default(fn () => 'PRD-'.str_pad((Product::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT))
                     ->readOnly(),
                 Forms\Components\TextInput::make('name')
@@ -42,16 +42,23 @@ class ProductResource extends Resource
                     ->required()
                     ->searchable()
                     ->createOptionForm([
-                Forms\Components\TextInput::make('name')
-                    ->label(__('resources.category.name'))
-                    ->required(),
-                Forms\Components\Textarea::make('description')
-                    ->label(__('resources.category.description')),
+                        Forms\Components\TextInput::make('name')
+                            ->label(__('resources.category.name'))
+                            ->required(),
+                        Forms\Components\Textarea::make('description')
+                            ->label(__('resources.category.description')),
                     ]),
                 Forms\Components\TextInput::make('barcode')
                     ->label(__('resources.product.barcode'))
                     ->required()
                     ->numeric(),
+                Forms\Components\TextInput::make('price')
+                    ->label(__('resources.product.price'))
+                    ->required()
+                    ->mask(RawJs::make('$money($input, \',\')'))
+                    ->stripCharacters('.')
+                    ->numeric()
+                    ->prefix('Rp'),
                 Forms\Components\Textarea::make('description')
                     ->label(__('resources.product.description'))
                     ->required()
@@ -75,6 +82,10 @@ class ProductResource extends Resource
                 Tables\Columns\TextColumn::make('barcode')
                     ->label(__('resources.product.barcode'))
                     ->searchable(),
+                Tables\Columns\TextColumn::make('price')
+                    ->label(__('resources.product.price'))
+                    ->money('IDR')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label(__('resources.product.created_at'))
                     ->dateTime()
@@ -143,6 +154,3 @@ class ProductResource extends Resource
             ]);
     }
 }
-
-
-

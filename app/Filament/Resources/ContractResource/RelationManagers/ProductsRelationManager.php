@@ -32,8 +32,22 @@ class ProductsRelationManager extends RelationManager
                     ->relationship('product', 'name')
                     ->required()
                     ->searchable()
-                    ->live(),
-
+                    ->live()
+                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                        if ($state) {
+                            $product = Product::find($state);
+                            if ($product) {
+                                $set('price', number_format($product->price, 0, ',', '.'));
+                            }
+                        }
+                    }),
+                Forms\Components\TextInput::make('price')
+                    ->label(__('resources.contract_product.price'))
+                    ->required()
+                    ->mask(RawJs::make('$money($input, \',\')'))
+                    ->stripCharacters('.')
+                    ->numeric()
+                    ->prefix('Rp'),
                 Forms\Components\TextInput::make('quantity')
                     ->label(__('resources.contract_product.quantity'))
                     ->required()
@@ -178,5 +192,3 @@ class ProductsRelationManager extends RelationManager
             ]);
     }
 }
-
-

@@ -31,7 +31,7 @@ return [
     'contract_product' => [
         'label' => 'Contract Products',
         'product' => 'Product',
-        'nilai_penugasan' => 'Assignment Value',
+        'price' => 'Price',
         'quantity' => 'Quantity',
         'status' => 'Status',
         'status_at' => 'Status At',
@@ -56,7 +56,7 @@ return [
         'label' => 'Invoice Products',
         'invoice' => 'Invoice',
         'product' => 'Product',
-        'nilai_penugasan' => 'Assignment Value',
+        'price' => 'Price',
         'quantity' => 'Quantity',
         'status' => 'Status',
         'status_at' => 'Status At',
@@ -74,10 +74,8 @@ return [
     'procurement' => [
         'label' => 'Procurements',
         'code' => 'Code',
-        'number' => 'Number Work Order',
-        'amp_id' => 'AMP ID',
-        'penugasan_id' => 'Name Assignment',
-        'kategori' => 'Category',
+        'number' => 'Number',
+        'contract' => 'Pekerjaan',
         'start_date' => 'Start Date',
         'end_date' => 'End Date',
         'status' => 'Status',
@@ -91,6 +89,7 @@ return [
         'label' => 'Procurement Products',
         'procurement' => 'Procurement',
         'product' => 'Name',
+        'price' => 'Price',
         'quantity' => 'Quantity',
         'status' => 'Status',
         'status_at' => 'Status At',
@@ -104,8 +103,8 @@ return [
         'category' => 'Category',
         'barcode' => 'Barcode',
         'description' => 'Description',
+        'price' => 'Price',
         'stock' => 'Stock',
-
         'created_at' => 'Created At',
         'updated_at' => 'Updated At',
         'notifications' => [
@@ -176,7 +175,7 @@ return [
         'label' => 'Purchase Products',
         'purchase' => 'Purchase',
         'product' => 'Product',
-        'nilai_penugasan' => 'Assignment Value',
+        'price' => 'Price',
         'quantity' => 'Quantity',
         'status' => 'Status',
         'status_at' => 'Status At',
@@ -200,7 +199,7 @@ return [
         'label' => 'Shipping Document Products',
         'shipping_document' => 'Shipping Document',
         'product' => 'Product',
-        'nilai_penugasan' => 'Assignment Value',
+        'price' => 'Price',
         'quantity' => 'Quantity',
         'status' => 'Status',
         'status_at' => 'Status At',
@@ -259,6 +258,3 @@ return [
         ],
     ],
 ];
-
-
-

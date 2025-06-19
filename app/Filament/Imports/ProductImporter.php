@@ -30,7 +30,12 @@ class ProductImporter extends Importer
             ImportColumn::make('description')
                 ->label(__('resources.product.description'))
                 ->requiredMapping()
-                ->rules(['required'])
+                ->rules(['required']),
+            ImportColumn::make('price')
+                ->label(__('resources.product.price'))
+                ->requiredMapping()
+                ->rules(['required', 'numeric', 'min:0'])
+                ->numeric(),
         ];
     }
 

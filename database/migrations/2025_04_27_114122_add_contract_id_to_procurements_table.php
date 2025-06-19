@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('shipping_documents', function (Blueprint $table) {
-            $table->string('suratJalan_document')->nullable()->after('status_at');
-
+        Schema::table('procurements', function (Blueprint $table) {
+            $table->foreignId('contract_id')->nullable()->constrained('contracts')->onDelete('cascade');
         });
     }
 
@@ -22,9 +21,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('shipping_documents', function (Blueprint $table) {
-            $table->dropColumn('suratJalan_document');
-
+        Schema::table('procurements', function (Blueprint $table) {
+            $table->dropForeign(['contract_id']);
+            $table->dropColumn('contract_id');
         });
     }
 };
