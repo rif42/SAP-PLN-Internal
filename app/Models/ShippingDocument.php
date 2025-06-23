@@ -21,11 +21,13 @@ class ShippingDocument extends Model
         'supplier_id',
         'status',
         'status_at',
+        'attachments',
     ];
 
     protected $casts = [
         'status' => ProductStatus::class,
         'status_at' => 'datetime',
+        'attachments' => 'array',
     ];
 
     protected static function booted()

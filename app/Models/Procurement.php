@@ -17,11 +17,11 @@ class Procurement extends Model
     protected $fillable = [
         'code',
         'number',
-        'contract_id',
         'start_date',
         'end_date',
         'status',
         'status_at',
+        'attachments',
     ];
 
     protected $casts = [
@@ -29,6 +29,7 @@ class Procurement extends Model
         'end_date' => 'date',
         'status' => ProductStatus::class,
         'status_at' => 'datetime',
+        'attachments' => 'array',
     ];
 
     protected static function booted()
@@ -49,13 +50,13 @@ class Procurement extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['code', 'number', 'contract.name', 'start_date', 'end_date'])
+            ->logOnly(['code', 'number', 'start_date', 'end_date'])
             ->logOnlyDirty();
     }
 
-    public function contract(): BelongsTo
+    public function contract()
     {
-        return $this->belongsTo(Contract::class);
+        return $this->hasOne(Contract::class);
     }
 
     public function products(): HasMany

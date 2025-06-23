@@ -27,22 +27,17 @@ class ProductImporter extends Importer
                 ->label(__('resources.product.barcode'))
                 ->requiredMapping()
                 ->rules(['required', 'string', 'max:100']),
-            ImportColumn::make('description')
-                ->label(__('resources.product.description'))
+            ImportColumn::make('specification')
+                ->label(__('resources.product.specification'))
                 ->requiredMapping()
                 ->rules(['required']),
-            ImportColumn::make('price')
-                ->label(__('resources.product.price'))
-                ->requiredMapping()
-                ->rules(['required', 'numeric', 'min:0'])
-                ->numeric(),
         ];
     }
 
     public function resolveRecord(): ?Product
     {
         $product = new Product;
-        $product->code = 'PRD-'.str_pad((Product::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT);
+        $product->code = 'PRD-' . str_pad((Product::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT);
 
         return $product;
     }
@@ -52,7 +47,7 @@ class ProductImporter extends Importer
         $body = __('resources.product.notifications.import.completed', ['count' => number_format($import->successful_rows)]);
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' '.__('resources.product.notifications.import.failed', ['count' => number_format($failedRowsCount)]);
+            $body .= ' ' . __('resources.product.notifications.import.failed', ['count' => number_format($failedRowsCount)]);
         }
 
         return $body;

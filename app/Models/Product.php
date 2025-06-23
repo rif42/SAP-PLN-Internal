@@ -18,15 +18,14 @@ class Product extends Model
         'name',
         'category_id',
         'barcode',
-        'description',
-        'price',
+        'specification',
         'stock',
     ];
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'category.name', 'barcode', 'description', 'price', 'stock'])
+            ->logOnly(['name', 'category.name', 'barcode', 'specification', 'stock'])
             ->logOnlyDirty();
     }
 
